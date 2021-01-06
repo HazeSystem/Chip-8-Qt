@@ -1,4 +1,5 @@
 # chip8-qt
 Emulator is complete, but debugger is still very much a work in progress. Currently it only shows the disassembly, and isn't connected to the emulator yet in any way.
 
-![emulator window](/screenshots/emulator.png "chip8-qt")
+![](/screenshots/emulator.png "emulator window")
+![](/screenshots/debugger.png "debugger window")
