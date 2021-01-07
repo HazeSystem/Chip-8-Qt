@@ -3,6 +3,7 @@
 
 #include "chip8.h"
 
+#include <QFontDatabase>
 #include <QListWidgetItem>
 #include <QMainWindow>
 #include <QScrollBar>

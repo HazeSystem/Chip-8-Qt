@@ -9,11 +9,23 @@
 
 //QByteArray rom;
 std::vector<std::vector<QString>> disassembly;
-std::vector<unsigned char> buffer;
+std::vector<unsigned char> disassemblyViewbuffer;
+size_t ram_size;
 C8Dasm c8dasm;
+QByteArray hexViewBuffer;
 
 Debugger::Debugger(QWidget *parent) : QMainWindow(parent),  ui(new Ui::Debugger) {
     ui->setupUi(this);
+
+    QFont f = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+
+    if(!(f.styleHint() & QFont::Monospace))
+    {
+        f.setFamily("Monospace"); // Force Monospaced font
+        f.setStyleHint(QFont::TypeWriter);
+    }
+
+    this->setFont(f);
 
     connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -21,11 +33,6 @@ Debugger::Debugger(QWidget *parent) : QMainWindow(parent),  ui(new Ui::Debugger)
     connect(ui->listWidget_2->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget_3->verticalScrollBar(), SLOT(setValue(int)));
     connect(ui->listWidget_3->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget_4->verticalScrollBar(), SLOT(setValue(int)));
     connect(ui->listWidget_4->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget->verticalScrollBar(), SLOT(setValue(int)));
-
-//    connect(ui->listWidget, SIGNAL(currentRowChanged(int)), ui->listWidget_2, SLOT(setCurrentRow(int)));
-//    connect(ui->listWidget_2, SIGNAL(currentRowChanged(int)), ui->listWidget_3, SLOT(setCurrentRow(int)));
-//    connect(ui->listWidget_3, SIGNAL(currentRowChanged(int)), ui->listWidget_4, SLOT(setCurrentRow(int)));
-//    connect(ui->listWidget_4, SIGNAL(currentRowChanged(int)), ui->listWidget, SLOT(setCurrentRow(int)));
 
 //    ui->splitter->setStretchFactor(0, 1);
 //    ui->splitter_2->setStretchFactor(1, 1);
@@ -43,11 +50,16 @@ Debugger::~Debugger() {
 
 bool Debugger::disassembleRom(Chip8 *c8, QString filepath) {
     bool empty = c8->memory.empty();
-    if (!empty) {
-        for (unsigned int i = 0; i < 0x200 + c8->rom_size; i++)
-            buffer.push_back(c8->memory[i]);
+    ram_size = 0x200 + c8->rom_size;
 
-        disassembly = c8dasm.Disassemble(buffer);
+    for (size_t i = 0; i < ram_size; i++)
+        hexViewBuffer.push_back(c8->memory[i]);
+
+    if (!empty) {
+        for (unsigned int i = 0; i < ram_size; i++)
+            disassemblyViewbuffer.push_back(c8->memory[i]);
+
+        disassembly = c8dasm.Disassemble(disassemblyViewbuffer);
 
         for (unsigned int i = 0; i < disassembly.size(); i++)
                 addItem(disassembly[i]);
@@ -55,10 +67,11 @@ bool Debugger::disassembleRom(Chip8 *c8, QString filepath) {
         this->setWindowTitle("Chip-8 Qt debugger - " + filepath);
     }
 
-//    QHexDocument* document = QHexDocument::fromMemory<QMemoryBuffer>(array);
+    QHexDocument* document = QHexDocument::fromMemory<QMemoryBuffer>(hexViewBuffer);
 //    QHexView* hexview = new QHexView();
-//    hexview->setDocument(document);                  // Associate QHexEditData with this QHexEdit
+    ui->hexViewWidget->setDocument(document);                  // Associate QHexEditData with this QHexEdit
 //    this->setCentralWidget(hexview);
+//    ui->hexViewWidget->set
     return empty;
 }
 
