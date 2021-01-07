@@ -3,14 +3,14 @@
 
 std::vector<std::vector<QString>> C8Dasm::Disassemble(std::vector<unsigned char> rom) {
     Disassembler c8dasm;
-    c8dasm.max_address_ = rom.size() + 0x200;
+    c8dasm.max_address_ = rom.size();
 
     try {
         // load the ROM
         c8dasm.rom_ = rom;
 
         // analyze the code
-        c8dasm.discover();
+//        c8dasm.discover();
 
         // display the code
         c8dasm.render();

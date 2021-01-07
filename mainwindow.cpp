@@ -3,9 +3,11 @@
 #include "SDL2Widget.h"
 #include "chip8.h"
 
-std::size_t fileSize;
 QByteArray rom;
+QString filepath;
 std::vector<unsigned char> rom_out;
+Chip8 *chip8;
+Debugger *dbg;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -32,38 +34,60 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void MainWindow::openRom() {
-    QString filename =  QFileDialog::getOpenFileName(
+    filepath =  QFileDialog::getOpenFileName(
               this,
               "Open Document",
               QDir::currentPath(),
               "Chip-8 ROM file (*.ch8)");
 
-        if(!filename.isNull()) {
-          qDebug() << "selected file path : " << filename.toUtf8();
-        }
+    if(!filepath.isNull()) {
+      qDebug() << "selected file path : " << filepath.toUtf8();
+    }
 
-        QFile file(filename);
-           if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-               return;
+    std::string filename = filepath.toUtf8().constData();
 
-           while (!file.atEnd()) {
-               rom.append(file.readLine());
-           }
+    // Remove directory if present.
+    // Do this before extension removal incase directory has a period character.
+    const size_t last_slash_idx = filename.find_last_of("\\/");
+    if (std::string::npos != last_slash_idx)
+    {
+        filename.erase(0, last_slash_idx + 1);
+    }
 
-        fileSize = rom.size();
-        for (unsigned int i = 0; i < fileSize; i++)
-            rom_out.push_back(rom[i]);
-        rom = NULL;
+    // Remove extension if present.
+    const size_t period_idx = filename.rfind('.');
+    if (std::string::npos != period_idx)
+    {
+        filename.erase(period_idx);
+    }
 
-        SDL2Widget::loadRom(rom_out);
+    this->setWindowTitle("Chip-8 Qt - " + QString::fromStdString(filename));
+
+    QFile file(filepath);
+       if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+           return;
+
+       while (!file.atEnd()) {
+           rom.append(file.readLine());
+       }
+
+        for (int i = 0; i < rom.size(); i++)
+        rom_out.push_back(rom[i]);
+    rom = NULL;
+
+    SDL2Widget::loadRom(rom_out);
 }
 
 void MainWindow::openDebugger() {
     debugWindow = new Debugger();
-    sendRom(debugWindow);
+    dbg = debugWindow;
+    chip8 = SDL2Widget::getContext();
+    bool success = !debugWindow->disassembleRom(chip8, filepath);
+    if (!success)
+        std::cout << "ROM not loaded" << std::endl;
     debugWindow->show();
 }
 
-void MainWindow::sendRom(Debugger *debugWindow) {
-    debugWindow->recRom(rom_out);
+void MainWindow::closeEvent(QCloseEvent *event) {
+    dbg->close();
 }

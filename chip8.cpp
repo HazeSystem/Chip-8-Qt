@@ -11,7 +11,7 @@ std::uniform_int_distribution<int> distribution(0, 255);
 //    0x12, 0x18, 0x80, 0x40, 0x20, 0x10, 0x20, 0x40, 0x80, 0x10
 //};
 
-unsigned char font[80] =
+std::vector<unsigned char> font
 {
 	0xF0, 0x90, 0x90, 0x90, 0xF0, //0
 	0x20, 0x60, 0x20, 0x20, 0x70, //1
@@ -36,27 +36,28 @@ void Chip8::init(std::vector<unsigned char> rom) {
 	opcode = 0;
 	I = 0;
 	sp = 0;
+    rom_size = rom.size();
 
 	for (int i = 0; i < 2048; i++)
-		gfx[i] = 0;
+        gfx.push_back(0);
 
 	for (int i = 0; i < 16; i++)
-		stack[i] = 0;
+        stack.push_back(0);
 
 	for (int i = 0; i < 16; i++)
-		V[i] = 0;
+        V.push_back(0);
 
 	for (int i = 0; i < 4096; i++)
-		memory[i] = 0;
+        memory.push_back(0);
 
 	for (int i = 0; i < 16; i++)
-		key[i] = 0;
+        key.push_back(0);
 
 	for (int i = 0; i < 80; i++)
 		memory[0x50 + i] = font[i];
 
-    for (unsigned int i = 0; i < rom.size(); i++)
-        {memory[i+0x200] = rom[i];}
+    for (unsigned int i = 0; i < rom_size; i++)
+        memory[i+0x200] = rom[i];
 
 	delay_timer = 0;
 	sound_timer = 0;
@@ -78,6 +79,9 @@ void Chip8::emulateCycle() {
 	switch (opcode & 0xF000) {
 	case 0x0000:
 		switch (opcode & 0x00FF) {
+        case 0x0000: // 0000: Does nothing for one cycle
+            break;
+
 		case 0x00E0: // 00E0: Clears the screen.
 			for (int i = 0; i < 2048; ++i)
 				gfx[i] = 0;

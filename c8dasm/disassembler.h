@@ -46,7 +46,7 @@ class Disassembler
         std::set<uint16_t> labels_;                     // list of labels
         std::set<uint16_t> codemap_;                    // codemap for this ROM
 
-        const int ROM_CODE_BEGIN{0x0200};               // code start address
+//        const int ROM_CODE_BEGIN{0x0200};               // code start address
 };
 
 #endif  // CHIP8_DISASSEM_H

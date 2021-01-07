@@ -1,6 +1,8 @@
 #ifndef SDL2WIDGET_H
 #define SDL2WIDGET_H
 
+#include "chip8.h"
+
 #include <SDL.h>
 #include <QDebug>
 #include <QWidget>
@@ -15,6 +17,7 @@ public:
 	~SDL2Widget();
     static void loadRom(std::vector<unsigned char> rom);
     static void recKey(int key, bool state);
+    static Chip8* getContext();
 
 private:
     QTimer* timer;

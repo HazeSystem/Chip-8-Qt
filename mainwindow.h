@@ -14,6 +14,7 @@
 #include <QTextEdit>
 #include <cstring>
 #include <fstream>
+#include <iostream>
 #include <vector>
 
 namespace Ui {
@@ -29,8 +30,9 @@ public:
     ~MainWindow();
 
 protected:
-    void keyPressEvent(QKeyEvent *event);
-    void keyReleaseEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void openRom();

@@ -1,5 +1,4 @@
 #include "SDL2Widget.h"
-#include "chip8.h"
 
 SDL_AudioSpec wavSpec;
 Uint32 wavLength;
@@ -223,6 +222,10 @@ void playBeep(SDL_AudioDeviceID deviceId) {
         SDL_PauseAudioDevice(deviceId, 0);
         SDL_Delay(200);
     }
+}
+
+Chip8* SDL2Widget::getContext() {
+    return &c8;
 }
 
 void SDL2Widget::mainLoop() {
