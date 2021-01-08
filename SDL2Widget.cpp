@@ -12,10 +12,12 @@ SDL_Event e;
 const int SCREEN_FPS = 240;
 
 Chip8 c8;
+SDL2Widget *sw;
 bool loaded = false;
 
 SDL2Widget::SDL2Widget(QWidget* parent) : QWidget(parent)
 {
+    sw = this;
     // Turn off double buffering for this widget. Double buffering
     // interferes with the ability for SDL to be properly displayed
     // on the QWidget.
@@ -44,18 +46,18 @@ SDL2Widget::SDL2Widget(QWidget* parent) : QWidget(parent)
         qDebug() << "error loading audio";
     deviceId = SDL_OpenAudioDevice(NULL, 0, &wavSpec, NULL, 0);
 
+    running = true;
+
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(mainLoop()));
     timer->start(1000 / SCREEN_FPS);
-    position = 0;
-    dir = 1;
 }
 
 SDL2Widget::~SDL2Widget()
 {
     SDL_CloseAudioDevice(deviceId);
     SDL_FreeWAV(wavBuffer);
-    SDL_DestroyRenderer(sdlRenderer);	// Basic SDL garbage collection
+    SDL_DestroyRenderer(sdlRenderer);
     SDL_DestroyWindow(sdlWindow);
     delete timer;
 
@@ -225,8 +227,12 @@ void playBeep(SDL_AudioDeviceID deviceId) {
     }
 }
 
-Chip8* SDL2Widget::getContext() {
+Chip8* SDL2Widget::getC8Context() {
     return &c8;
+}
+
+SDL2Widget* SDL2Widget::getSDLContext() {
+    return sw;
 }
 
 void SDL2Widget::mainLoop() {
@@ -252,4 +258,14 @@ void SDL2Widget::recKey(int k, bool state) {
 void SDL2Widget::loadRom(std::vector<unsigned char> rom) {
     c8.init(rom);
     loaded = true;
+}
+
+void SDL2Widget::run() {
+    timer->start(1000 / SCREEN_FPS);
+    running = true;
+}
+
+void SDL2Widget::breakPoint() {
+    timer->stop();
+    running = false;
 }

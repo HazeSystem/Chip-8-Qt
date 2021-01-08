@@ -10,6 +10,9 @@
     <height>700</height>
    </rect>
   </property>
+  <property name="focusPolicy">
+   <enum>Qt::NoFocus</enum>
+  </property>
   <property name="windowTitle">
    <string>Debugger</string>
   </property>

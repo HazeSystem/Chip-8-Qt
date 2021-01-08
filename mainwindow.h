@@ -28,15 +28,17 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    SDL2Widget* sw;
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
 private slots:
     void openRom();
-    void openDebugger();
+    void openDebugger();    
 
 private:
     Ui::MainWindow *ui;

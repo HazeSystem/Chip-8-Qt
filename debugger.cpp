@@ -2,12 +2,10 @@
 #include "ui_debugger.h"
 #include "mainwindow.h"
 #include "chip8.h"
-#include "SDL2Widget.h"
 #include "c8dasm/c8dasm.h"
 #include "hexview/qhexview.h"
 #include "hexview/document/buffer/qmemorybuffer.h"
 
-//QByteArray rom;
 std::vector<std::vector<QString>> disassembly;
 std::vector<unsigned char> disassemblyViewbuffer;
 size_t ram_size;
@@ -17,6 +15,12 @@ QByteArray hexViewBuffer;
 
 Debugger::Debugger(QWidget *parent) : QMainWindow(parent),  ui(new Ui::Debugger) {
     ui->setupUi(this);
+
+    sw = SDL2Widget::getSDLContext();
+
+    QSettings settings("adalovegirls", "chip8-qt");
+    restoreGeometry(settings.value("debug_geometry").toByteArray());
+    restoreState(settings.value("debug_state").toByteArray(), UI_VERSION);
 
     QFont f = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
@@ -63,7 +67,7 @@ bool Debugger::disassembleRom(Chip8 *c8, QString filepath) {
         disassembly = c8dasm.Disassemble(disassemblyViewbuffer);
 
         for (unsigned int i = 0; i < disassembly.size(); i++)
-                addItem(disassembly[i]);
+            addItem(disassembly[i]);
 
         this->setWindowTitle("Chip-8 Qt debugger - " + filepath);
     }
@@ -120,13 +124,25 @@ void Debugger::on_listWidget_4_itemSelectionChanged() {
 
 void Debugger::showEvent(QShowEvent *event) {
     QMainWindow::showEvent(event);
-    // Call slot via queued connection so it's called from the UI thread after this method has returned and the window has been shown
-    QMetaObject::invokeMethod(this, "scroll", Qt::ConnectionType::QueuedConnection);
+    QMetaObject::invokeMethod(this, "init", Qt::ConnectionType::QueuedConnection);
 }
 
-void Debugger::scroll() {
+void Debugger::closeEvent(QCloseEvent *event) {
+    QSettings settings("adalovegirls", "chip8-qt");
+    settings.setValue("debug_geometry", saveGeometry());
+    settings.setValue("debug_state", saveState(1));
+}
+
+void Debugger::mousePressEvent(QMouseEvent *event) {
+    if (sw->running)
+        sw->breakPoint();
+}
+
+void Debugger::init() {
     if (!empty) {
         ui->listWidget->scrollToItem(ui->listWidget->item(0x100), QAbstractItemView::PositionAtCenter);
         ui->listWidget->setCurrentRow(0x100);
+        if (sw->running)
+            sw->breakPoint();
     }
 }

@@ -2,8 +2,8 @@
 #define SDL2WIDGET_H
 
 #include "chip8.h"
+#include "timer.h"
 
-#include <SDL.h>
 #include <QDebug>
 #include <QWidget>
 #include <QTimer>
@@ -17,12 +17,15 @@ public:
 	~SDL2Widget();
     static void loadRom(std::vector<unsigned char> rom);
     static void recKey(int key, bool state);
-    static Chip8* getContext();
+    static Chip8* getC8Context();
+    static SDL2Widget* getSDLContext();
+    void run();
+    void breakPoint();
+
+    bool running;
 
 private:
     QTimer* timer;
-    int position;
-    int dir;
 
 private slots:
     void mainLoop();

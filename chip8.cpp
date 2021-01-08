@@ -1,18 +1,12 @@
 #include "chip8.h"
 
-bool running;
+#include <iostream>
+#include <QDebug>
+
 std::default_random_engine generator;
 std::uniform_int_distribution<int> distribution(0, 255);
 
-// Maze.ch8
-//unsigned char rom[34] = {
-//    0xA2, 0x1E, 0xC2, 0x01, 0x32, 0x01, 0xA2, 0x1A, 0xD0, 0x14, 0x70, 0x04,
-//    0x30, 0x40, 0x12, 0x00, 0x60, 0x00, 0x71, 0x04, 0x31, 0x20, 0x12, 0x00,
-//    0x12, 0x18, 0x80, 0x40, 0x20, 0x10, 0x20, 0x40, 0x80, 0x10
-//};
-
-std::vector<unsigned char> font
-{
+std::vector<unsigned char> font {
 	0xF0, 0x90, 0x90, 0x90, 0xF0, //0
 	0x20, 0x60, 0x20, 0x20, 0x70, //1
 	0xF0, 0x10, 0xF0, 0x80, 0xF0, //2
@@ -32,6 +26,8 @@ std::vector<unsigned char> font
 };
 
 void Chip8::init(std::vector<unsigned char> rom) {
+    debug = true;
+
 	pc = 0x200;
 	opcode = 0;
 	I = 0;
@@ -59,9 +55,8 @@ void Chip8::init(std::vector<unsigned char> rom) {
     for (unsigned int i = 0; i < rom_size; i++)
         memory[i+0x200] = rom[i];
 
-	delay_timer = 0;
+    delay_timer = 0;
 	sound_timer = 0;
-
 	draw = true;
 }
 
@@ -73,8 +68,8 @@ void Chip8::emulateCycle() {
 	unsigned short pixel;
 	bool keyPress = false;
 
-	/*if (debug)
-		console.log("$" + Number(pc).toString(16) + " " + Number(opcode).toString(16));*/
+//    if (debug)
+//        std::cout << std::hex << "$" << pc << " " << opcode << std::endl;
 
 	switch (opcode & 0xF000) {
 	case 0x0000:
@@ -94,8 +89,7 @@ void Chip8::emulateCycle() {
 
 		case 0x00EE: // 00EE: Returns from a subroutine.
 			--sp;
-			pc = stack[sp];
-			pc += 2;
+            pc = stack[sp] + 2;
 
 			/*if (debug)
 				console.log("  " + "Returned to pc = " + Number(pc).toString(16));*/

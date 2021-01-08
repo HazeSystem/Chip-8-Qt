@@ -13,6 +13,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
     setFixedSize(512, 282);
 
+    QSettings settings("adalovegirls", "chip8-qt");
+    restoreGeometry(settings.value("emu_geometry").toByteArray());
+    restoreState(settings.value("emu_state").toByteArray(), UI_VERSION);
+
+//    connect(this, SIGNAL())
+
     // File
     connect(ui->actionOpenROM, SIGNAL(triggered()), this, SLOT(openRom()));
     connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
@@ -26,11 +32,11 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    SDL2Widget::recKey(event->key(), 1);
+    sw->recKey(event->key(), 1);
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {
-    SDL2Widget::recKey(event->key(), 0);
+    sw->recKey(event->key(), 0);
 }
 
 void MainWindow::openRom() {
@@ -75,13 +81,16 @@ void MainWindow::openRom() {
         rom_out.push_back(rom[i]);
     rom = NULL;
 
-    SDL2Widget::loadRom(rom_out);
+    sw = SDL2Widget::getSDLContext();
+    sw->running = true;
+
+    sw->loadRom(rom_out);
 }
 
 void MainWindow::openDebugger() {
     debugWindow = new Debugger();
     dbg = debugWindow;
-    chip8 = SDL2Widget::getContext();
+    chip8 = sw->getC8Context();
     bool success = !debugWindow->disassembleRom(chip8, filepath);
     if (!success)
         std::cout << "ROM not loaded" << std::endl;
@@ -89,5 +98,15 @@ void MainWindow::openDebugger() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-    dbg->close();
+    if (dbg)
+        dbg->close();
+
+    QSettings settings("adalovegirls", "chip8-qt");
+    settings.setValue("emu_geometry", saveGeometry());
+    settings.setValue("emu_state", saveState(UI_VERSION));
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *event) {
+    if (!sw->running)
+        sw->run();
 }
