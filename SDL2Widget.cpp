@@ -32,12 +32,13 @@ SDL2Widget::SDL2Widget(QWidget* parent) : QWidget(parent)
      */
     setUpdatesEnabled(false);
 
-    SDL_Init(SDL_INIT_VIDEO);
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+        qDebug() << "Failed to initialize SDL video: " << SDL_GetError();
     sdlWindow = SDL_CreateWindowFrom((void*)this->winId());
     sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     if (SDL_Init(SDL_INIT_AUDIO) != 0)
-        qDebug() << "Failed to initialize SDL: " << SDL_GetError();
+        qDebug() << "Failed to initialize SDL audio: " << SDL_GetError();
 
     if (!SDL_LoadWAV("E3.wav", &wavSpec, &wavBuffer, &wavLength))
         qDebug() << "error loading audio";

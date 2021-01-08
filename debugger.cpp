@@ -11,6 +11,7 @@
 std::vector<std::vector<QString>> disassembly;
 std::vector<unsigned char> disassemblyViewbuffer;
 size_t ram_size;
+bool empty;
 C8Dasm c8dasm;
 QByteArray hexViewBuffer;
 
@@ -49,13 +50,13 @@ Debugger::~Debugger() {
 }
 
 bool Debugger::disassembleRom(Chip8 *c8, QString filepath) {
-    bool empty = c8->memory.empty();
+    empty = c8->memory.empty();
     ram_size = 0x200 + c8->rom_size;
 
-    for (size_t i = 0; i < ram_size; i++)
-        hexViewBuffer.push_back(c8->memory[i]);
-
     if (!empty) {
+        for (size_t i = 0; i < ram_size; i++)
+            hexViewBuffer.push_back(c8->memory[i]);
+
         for (unsigned int i = 0; i < ram_size; i++)
             disassemblyViewbuffer.push_back(c8->memory[i]);
 
@@ -68,10 +69,8 @@ bool Debugger::disassembleRom(Chip8 *c8, QString filepath) {
     }
 
     QHexDocument* document = QHexDocument::fromMemory<QMemoryBuffer>(hexViewBuffer);
-//    QHexView* hexview = new QHexView();
-    ui->hexViewWidget->setDocument(document);                  // Associate QHexEditData with this QHexEdit
-//    this->setCentralWidget(hexview);
-//    ui->hexViewWidget->set
+    ui->hexViewWidget->setDocument(document);
+
     return empty;
 }
 
@@ -126,6 +125,8 @@ void Debugger::showEvent(QShowEvent *event) {
 }
 
 void Debugger::scroll() {
-    ui->listWidget->scrollToItem(ui->listWidget->item(0x100), QAbstractItemView::PositionAtCenter);
-    ui->listWidget->setCurrentRow(0x100);
+    if (!empty) {
+        ui->listWidget->scrollToItem(ui->listWidget->item(0x100), QAbstractItemView::PositionAtCenter);
+        ui->listWidget->setCurrentRow(0x100);
+    }
 }
