@@ -6,21 +6,24 @@
 #include "hexview/qhexview.h"
 #include "hexview/document/buffer/qmemorybuffer.h"
 
+#include <QMainWindow>
+
 std::vector<std::vector<QString>> disassembly;
 std::vector<unsigned char> disassemblyViewbuffer;
 size_t ram_size;
 bool empty;
+Chip8 *chip8;
+Debugger *dbgctx;
 C8Dasm c8dasm;
 QByteArray hexViewBuffer;
 
 Debugger::Debugger(QWidget *parent) : QMainWindow(parent),  ui(new Ui::Debugger) {
     ui->setupUi(this);
-
+    dbgctx = this;
     sw = SDL2Widget::getSDLContext();
 
     QSettings settings("adalovegirls", "chip8-qt");
     restoreGeometry(settings.value("debug_geometry").toByteArray());
-    restoreState(settings.value("debug_state").toByteArray(), UI_VERSION);
 
     QFont f = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
@@ -39,10 +42,6 @@ Debugger::Debugger(QWidget *parent) : QMainWindow(parent),  ui(new Ui::Debugger)
     connect(ui->listWidget_3->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget_4->verticalScrollBar(), SLOT(setValue(int)));
     connect(ui->listWidget_4->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget->verticalScrollBar(), SLOT(setValue(int)));
 
-//    ui->splitter->setStretchFactor(0, 1);
-//    ui->splitter_2->setStretchFactor(1, 1);
-//    ui->splitter_3->setStretchFactor(0, 1);
-
     this->setStyleSheet("QWidget { border: 0; }");
     ui->listWidget->verticalScrollBar()->setStyleSheet("QScrollBar {width:0px;}");
     ui->listWidget_2->verticalScrollBar()->setStyleSheet("QScrollBar {width:0px;}");
@@ -53,23 +52,31 @@ Debugger::~Debugger() {
     delete ui;
 }
 
-bool Debugger::disassembleRom(Chip8 *c8, QString filepath) {
-    empty = c8->memory.empty();
-    ram_size = 0x200 + c8->rom_size;
+void Debugger::updateWidgets() {
+    if (chip8)
+        addRegisterViewItem();
+}
+
+bool Debugger::disassembleRom(QString filepath) {
+    chip8 = SDL2Widget::getC8Context();
+    empty = chip8->memory.empty();
+    ram_size = 0x200 + chip8->rom_size;
 
     if (!empty) {
         for (size_t i = 0; i < ram_size; i++)
-            hexViewBuffer.push_back(c8->memory[i]);
+            hexViewBuffer.push_back(chip8->memory[i]);
 
         for (unsigned int i = 0; i < ram_size; i++)
-            disassemblyViewbuffer.push_back(c8->memory[i]);
+            disassemblyViewbuffer.push_back(chip8->memory[i]);
 
         disassembly = c8dasm.Disassemble(disassemblyViewbuffer);
 
         for (unsigned int i = 0; i < disassembly.size(); i++)
-            addItem(disassembly[i]);
+            addDisassemblyViewItem(disassembly[i]);
 
-        this->setWindowTitle("Chip-8 Qt debugger - " + filepath);
+        addRegisterViewItem();
+
+        this->setWindowTitle(tr("Chip-8 Qt debugger - %1").arg(filepath));
     }
 
     QHexDocument* document = QHexDocument::fromMemory<QMemoryBuffer>(hexViewBuffer);
@@ -78,11 +85,9 @@ bool Debugger::disassembleRom(Chip8 *c8, QString filepath) {
     return empty;
 }
 
-void Debugger::addItem(std::vector<QString> item) {
+void Debugger::addDisassemblyViewItem(std::vector<QString> item) {
     for (size_t i = 0; i < 2; i++) {
-        QString s;
-        s = QString("%1").arg(item[i].toInt(), 4, 16, QChar{'0'}).toUpper();
-        item[i] = s;
+        item[i] = QString("%1").arg(item[i].toInt(), 4, 16, QChar{'0'}).toUpper();
     }
 
     ui->listWidget->addItem(item[0]);
@@ -92,6 +97,20 @@ void Debugger::addItem(std::vector<QString> item) {
         ui->listWidget_4->addItem(item[3]);
     if (item[3].isEmpty())
         ui->listWidget_4->addItem("");
+}
+
+void Debugger::addRegisterViewItem() {
+//    int itemCount = ui->leftRegisterListWidget->count();
+//    if (itemCount)
+//        ui->leftRegisterListWidget->clear();
+
+    for (int i = 0; i < 16; i++) {
+        ui->leftRegisterListWidget->addItem(QString("%1").arg(chip8->V[i], 4, 16, QChar{'0'}).toUpper());
+    }
+}
+
+Debugger* Debugger::getDebugContext() {
+    return dbgctx;
 }
 
 void Debugger::on_listWidget_itemSelectionChanged() {
@@ -123,26 +142,30 @@ void Debugger::on_listWidget_4_itemSelectionChanged() {
 }
 
 void Debugger::showEvent(QShowEvent *event) {
-    QMainWindow::showEvent(event);
     QMetaObject::invokeMethod(this, "init", Qt::ConnectionType::QueuedConnection);
 }
 
 void Debugger::closeEvent(QCloseEvent *event) {
     QSettings settings("adalovegirls", "chip8-qt");
     settings.setValue("debug_geometry", saveGeometry());
-    settings.setValue("debug_state", saveState(1));
 }
 
-void Debugger::mousePressEvent(QMouseEvent *event) {
-    if (sw->running)
-        sw->breakPoint();
+void Debugger::changeEvent(QEvent *event)
+{
+    QWidget::changeEvent(event);
+    if (event->type() == QEvent::ActivationChange)
+    {
+        if (this->isActiveWindow())
+        {
+            if (sw->running)
+                sw->breakPoint();
+        }
+    }
 }
 
 void Debugger::init() {
     if (!empty) {
         ui->listWidget->scrollToItem(ui->listWidget->item(0x100), QAbstractItemView::PositionAtCenter);
         ui->listWidget->setCurrentRow(0x100);
-        if (sw->running)
-            sw->breakPoint();
     }
 }

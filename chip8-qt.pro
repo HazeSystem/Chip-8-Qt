@@ -25,7 +25,8 @@ HEADERS += SDL2Widget.h \
     hexview/document/qhexmetadata.h \
     hexview/document/qhexrenderer.h \
     hexview/qhexview.h \
-    mainwindow.h
+    mainwindow.h \
+    settings.h
 
 SOURCES += main.cpp \
            SDL2Widget.cpp \
@@ -46,7 +47,8 @@ SOURCES += main.cpp \
            hexview/document/qhexmetadata.cpp \
            hexview/document/qhexrenderer.cpp \
            hexview/qhexview.cpp \
-           mainwindow.cpp
+           mainwindow.cpp \
+           settings.cpp
 
 
 LIBS += -L$$PWD/ThirdParty/lib/ -lSDL2
@@ -60,6 +62,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 FORMS += \
     debugger.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    settings.ui
 
 RESOURCES +=
+
+TRANSLATIONS = chip8-qt_eu.ts

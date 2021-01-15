@@ -6,7 +6,6 @@
 QByteArray rom;
 QString filepath;
 std::vector<unsigned char> rom_out;
-Chip8 *chip8;
 Debugger *dbg;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -15,12 +14,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     QSettings settings("adalovegirls", "chip8-qt");
     restoreGeometry(settings.value("emu_geometry").toByteArray());
-    restoreState(settings.value("emu_state").toByteArray(), UI_VERSION);
-
-//    connect(this, SIGNAL())
 
     // File
     connect(ui->actionOpenROM, SIGNAL(triggered()), this, SLOT(openRom()));
+    connect(ui->actionSettings, SIGNAL(triggered()), this, SLOT(openSettings()));
     connect(ui->actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
     //Debug
@@ -42,9 +39,9 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 void MainWindow::openRom() {
     filepath =  QFileDialog::getOpenFileName(
               this,
-              "Open Document",
+              tr("Open Document"),
               QDir::currentPath(),
-              "Chip-8 ROM file (*.ch8)");
+              tr("Chip-8 ROM file (*.ch8)"));
 
     if(!filepath.isNull()) {
       qDebug() << "selected file path : " << filepath.toUtf8();
@@ -90,11 +87,15 @@ void MainWindow::openRom() {
 void MainWindow::openDebugger() {
     debugWindow = new Debugger();
     dbg = debugWindow;
-    chip8 = sw->getC8Context();
-    bool success = !debugWindow->disassembleRom(chip8, filepath);
+    bool success = !debugWindow->disassembleRom(filepath);
     if (!success)
-        std::cout << "ROM not loaded" << std::endl;
+        qDebug() << "ROM not loaded" << Qt::endl;
     debugWindow->show();
+}
+
+void MainWindow::openSettings() {
+    settingsWindow = new Settings();
+    settingsWindow->show();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -103,10 +104,9 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
     QSettings settings("adalovegirls", "chip8-qt");
     settings.setValue("emu_geometry", saveGeometry());
-    settings.setValue("emu_state", saveState(UI_VERSION));
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event) {
-    if (!sw->running)
+    if (!rom_out.empty() && !sw->running)
         sw->run();
 }

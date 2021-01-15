@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "debugger.h"
+#include "settings.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -38,11 +39,13 @@ protected:
 
 private slots:
     void openRom();
-    void openDebugger();    
+    void openSettings();
+    void openDebugger();
 
 private:
     Ui::MainWindow *ui;
     Debugger *debugWindow;
+    Settings *settingsWindow;
     void sendRom(Debugger *debugWindow);
     unsigned int fileSize;
 };

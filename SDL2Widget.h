@@ -2,7 +2,7 @@
 #define SDL2WIDGET_H
 
 #include "chip8.h"
-#include "timer.h"
+#include "SDL.h"
 
 #include <QDebug>
 #include <QWidget>
@@ -30,6 +30,4 @@ private:
 private slots:
     void mainLoop();
 };
-
-
 #endif

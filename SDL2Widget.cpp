@@ -1,4 +1,5 @@
 #include "SDL2Widget.h"
+#include "debugger.h"
 
 SDL_AudioSpec wavSpec;
 Uint32 wavLength;
@@ -13,11 +14,12 @@ const int SCREEN_FPS = 240;
 
 Chip8 c8;
 SDL2Widget *sw;
+Debugger *debug;
 bool loaded = false;
 
-SDL2Widget::SDL2Widget(QWidget* parent) : QWidget(parent)
-{
+SDL2Widget::SDL2Widget(QWidget* parent) : QWidget(parent) {
     sw = this;
+    debug = Debugger::getDebugContext();
     // Turn off double buffering for this widget. Double buffering
     // interferes with the ability for SDL to be properly displayed
     // on the QWidget.
@@ -53,8 +55,7 @@ SDL2Widget::SDL2Widget(QWidget* parent) : QWidget(parent)
     timer->start(1000 / SCREEN_FPS);
 }
 
-SDL2Widget::~SDL2Widget()
-{
+SDL2Widget::~SDL2Widget() {
     SDL_CloseAudioDevice(deviceId);
     SDL_FreeWAV(wavBuffer);
     SDL_DestroyRenderer(sdlRenderer);
@@ -238,6 +239,9 @@ SDL2Widget* SDL2Widget::getSDLContext() {
 void SDL2Widget::mainLoop() {
     if (loaded)
         c8.emulateCycle();
+
+//    if (debug->isVisible())
+    debug->updateWidgets();
 
     if (c8.draw)
         drawGraphics();

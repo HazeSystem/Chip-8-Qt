@@ -12,6 +12,7 @@
 #include <QSignalMapper>
 #include <QString>
 #include <QTextStream>
+#include <QTranslator>
 #include <string>
 #include <vector>
 
@@ -28,13 +29,15 @@ class Debugger : public QMainWindow
 public:
     explicit Debugger(QWidget *parent = nullptr);
     ~Debugger();
-    bool disassembleRom(Chip8 *c8, QString filepath);
+    bool disassembleRom(QString filepath);
+    void updateWidgets();
+    static Debugger* getDebugContext();
     SDL2Widget *sw;
 
 protected:
     void showEvent(QShowEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
+    void changeEvent(QEvent *event) override;
 
 private slots:
     void on_listWidget_itemSelectionChanged();
@@ -45,7 +48,9 @@ private slots:
 
 private:
     Ui::Debugger *ui;
-    void addItem(std::vector<QString> item);
+    void addDisassemblyViewItem(std::vector<QString> item);
+    void addRegisterViewItem();
+    void addStackViewItem(std::vector<QString> item);
 };
 
 #endif // DEBUGGER_H

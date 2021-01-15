@@ -20,15 +20,16 @@ public:
     std::vector<unsigned char> gfx;	// Total amount of pixels: 2048
     std::vector<unsigned char> key;
 
-private:
-	unsigned short pc;				// Program counter
-	unsigned short opcode;			// Current opcode
-	unsigned short I;				// Index register
+    unsigned short pc;				// Program counter
+    unsigned short I;				// Index register
     unsigned char  sp;				// Stack pointer
 
     std::vector<unsigned char>  V;			// V-regs (V0-VF)
     std::vector<unsigned short> stack;		// Stack (16 levels)
 
-	unsigned char  delay_timer;		// Delay timer
-	unsigned char  sound_timer;		// Sound timer		
+    unsigned char  delay_timer;		// Delay timer
+    unsigned char  sound_timer;		// Sound timer
+
+private:
+    unsigned short opcode;			// Current opcode
 };
