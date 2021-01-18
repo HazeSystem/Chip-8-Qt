@@ -3,6 +3,7 @@
 
 #include "chip8.h"
 #include "SDL.h"
+#include "debugger.h"
 
 #include <QDebug>
 #include <QWidget>

@@ -11,6 +11,10 @@ int main(int argc,char* argv[])
     translator.load("translations/" + language);
     app.installTranslator(&translator);
 
+    app.setStyleSheet("QListWidget::item:hover {background: transparent;}");
+    app.setStyleSheet("QListWidget::item:disabled:hover {background: transparent;}");
+    app.setStyleSheet("QListWidget::item:hover:!active {background: transparent;}");
+
     MainWindow window;
     window.show();
 

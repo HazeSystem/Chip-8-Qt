@@ -10,6 +10,7 @@
 #include <QScrollBar>
 #include <QSettings>
 #include <QSignalMapper>
+#include <QStyledItemDelegate>
 #include <QString>
 #include <QTextStream>
 #include <QTranslator>
@@ -32,12 +33,12 @@ public:
     bool disassembleRom(QString filepath);
     void updateWidgets();
     static Debugger* getDebugContext();
-    SDL2Widget *sw;
 
 protected:
     void showEvent(QShowEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
     void changeEvent(QEvent *event) override;
+//    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 private slots:
     void on_listWidget_itemSelectionChanged();
