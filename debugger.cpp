@@ -46,6 +46,7 @@ Debugger::Debugger(QWidget *parent) : QMainWindow(parent),  ui(new Ui::Debugger)
     // Run
     connect(ui->actionRun, SIGNAL(triggered()), sdl2, SLOT(run()));
     connect(ui->actionRun_to_Next_Line, SIGNAL(triggered()), sdl2, SLOT(singleStep()));
+    connect(ui->actionAnimate, SIGNAL(triggered()), this, SLOT(setAnimate()));
 
     connect(ui->listWidget->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget_2->verticalScrollBar(), SLOT(setValue(int)));
     connect(ui->listWidget_2->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget_3->verticalScrollBar(), SLOT(setValue(int)));
@@ -103,6 +104,15 @@ void Debugger::updateWidgets() {
 void Debugger::updateCurrentLine() {
     ui->listWidget->scrollToItem(ui->listWidget->item(chip8->pc / 2), QAbstractItemView::PositionAtCenter);
     ui->listWidget->setCurrentRow(chip8->pc / 2);
+}
+
+bool Debugger::getAnimate() {
+    return animate;
+}
+
+void Debugger::setAnimate() {
+    animate = true;
+    sdl2->run();
 }
 
 void Debugger::addDisassemblyViewItems(std::vector<std::vector<QString>> disasm) {
@@ -288,8 +298,10 @@ void Debugger::changeEvent(QEvent *event)
     {
         if (this->isActiveWindow())
         {
-            if (sdl2->running)
+            if (sdl2->running) {
                 sdl2->breakPoint();
+                animate = false;
+            }
             if (chip8) {
                 updateWidgets();
                 updateCurrentLine();

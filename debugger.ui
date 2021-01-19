@@ -230,6 +230,7 @@
     </property>
     <addaction name="actionRun"/>
     <addaction name="actionRun_to_Next_Line"/>
+    <addaction name="actionAnimate"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDebug"/>
@@ -256,6 +257,14 @@
    </property>
    <property name="shortcut">
     <string>F9</string>
+   </property>
+  </action>
+  <action name="actionAnimate">
+   <property name="text">
+    <string>Animate</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+A</string>
    </property>
   </action>
  </widget>

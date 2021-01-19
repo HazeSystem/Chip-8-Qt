@@ -32,7 +32,10 @@ public:
     ~Debugger();
     void disassembleRom(QString filepath);
     void updateWidgets();
+    void updateCurrentLine();
+    bool getAnimate();
     static Debugger* getDebugContext();
+
     bool loaded = false;
 
 protected:
@@ -48,13 +51,14 @@ private slots:
     void on_leftRegisterListWidget_itemDoubleClicked(QListWidgetItem *item);
     void on_rightRegisterListWidget_itemDoubleClicked(QListWidgetItem *item);
     void on_stackListWidget_itemDoubleClicked(QListWidgetItem *item);
+    void setAnimate();
 
 private:
     Ui::Debugger *ui;
     void addDisassemblyViewItems(std::vector<std::vector<QString>> disasm);
     void addRegisterViewItems();
     void addStackViewItems();
-    void updateCurrentLine();
+    bool animate = false;
 };
 
 #endif // DEBUGGER_H

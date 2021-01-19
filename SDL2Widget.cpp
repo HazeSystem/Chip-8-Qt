@@ -244,6 +244,8 @@ void SDL2Widget::mainLoop() {
     if (debug) {
         if (loaded && debug->loaded)
             debug->updateWidgets();
+        if (debug->getAnimate())
+            debug->updateCurrentLine();
     }
 
     if (loaded && c8.draw)
@@ -283,6 +285,8 @@ void SDL2Widget::breakPoint() {
 }
 
 void SDL2Widget::singleStep() {
-    if (loaded)
+    if (loaded) {
         mainLoop();
+        debug->updateCurrentLine();
+    }
 }
