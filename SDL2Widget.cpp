@@ -14,6 +14,7 @@ const int SCREEN_FPS = 240;
 
 Chip8 c8;
 SDL2Widget *sw;
+Debugger *debug;
 bool loaded = false;
 
 SDL2Widget::SDL2Widget(QWidget* parent) : QWidget(parent) {
@@ -235,13 +236,20 @@ SDL2Widget* SDL2Widget::getSDLContext() {
 }
 
 void SDL2Widget::mainLoop() {
+    debug = Debugger::getDebugContext();
+
     if (loaded)
         c8.emulateCycle();
 
-    if (c8.draw)
+    if (debug) {
+        if (loaded && debug->loaded)
+            debug->updateWidgets();
+    }
+
+    if (loaded && c8.draw)
         drawGraphics();
 
-    if (c8.beep) {
+    if (loaded && c8.beep) {
         playBeep(deviceId);
         c8.beep = false;
     }
@@ -260,11 +268,21 @@ void SDL2Widget::loadRom(std::vector<unsigned char> rom) {
 }
 
 void SDL2Widget::run() {
-    timer->start(1000 / SCREEN_FPS);
-    running = true;
+    if (loaded) {
+        this->activateWindow();
+        timer->start(1000 / SCREEN_FPS);
+        running = true;
+    }
 }
 
 void SDL2Widget::breakPoint() {
-    timer->stop();
-    running = false;
+    if (loaded) {
+        timer->stop();
+        running = false;
+    }
+}
+
+void SDL2Widget::singleStep() {
+    if (loaded)
+        mainLoop();
 }

@@ -6,11 +6,13 @@
 QByteArray rom;
 QString filepath;
 std::vector<unsigned char> rom_out;
-Debugger *dbg;
+Debugger* dbg;
+MainWindow* mainctx;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     setFixedSize(512, 282);
+    mainctx = this;
 
     QSettings settings("adalovegirls", "chip8-qt");
     restoreGeometry(settings.value("emu_geometry").toByteArray());
@@ -28,6 +30,10 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+MainWindow* MainWindow::getMainWindowContext() {
+    return mainctx;
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event) {
     sw->recKey(event->key(), 1);
 }
@@ -37,6 +43,8 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void MainWindow::openRom() {
+    isDebuggerCreated = false;
+
     filepath =  QFileDialog::getOpenFileName(
               this,
               tr("Open Document"),
@@ -67,16 +75,20 @@ void MainWindow::openRom() {
     this->setWindowTitle("Chip-8 Qt - " + QString::fromStdString(filename));
 
     QFile file(filepath);
-       if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-           return;
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+       return;
 
-       while (!file.atEnd()) {
-           rom.append(file.readLine());
-       }
+    while (!file.atEnd()) {
+       rom.append(file.readLine());
+    }
 
-        for (int i = 0; i < rom.size(); i++)
+    if (!rom_out.empty())
+        rom_out.clear();
+
+    for (int i = 0; i < rom.size(); i++)
         rom_out.push_back(rom[i]);
-    rom = NULL;
+
+    rom.clear();
 
     sw = SDL2Widget::getSDLContext();
     sw->running = true;
@@ -85,12 +97,22 @@ void MainWindow::openRom() {
 }
 
 void MainWindow::openDebugger() {
-    debugWindow = new Debugger();
-    dbg = debugWindow;
-    bool success = !debugWindow->disassembleRom(filepath);
-    if (!success)
-        qDebug() << "ROM not loaded" << Qt::endl;
-    debugWindow->show();
+    if (!isDebuggerCreated) {
+        debugWindow = new Debugger();
+        dbg = debugWindow;
+
+        if (!filepath.isNull()) {
+            debugWindow->disassembleRom(filepath);
+            isDebuggerCreated = true;
+        }
+        debugWindow->show();
+    }
+    else if (isDebuggerCreated) {
+        if (debugWindow->isVisible())
+            debugWindow->activateWindow();
+        else
+            debugWindow->show();
+    }
 }
 
 void MainWindow::openSettings() {

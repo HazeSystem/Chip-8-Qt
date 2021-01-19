@@ -30,6 +30,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     SDL2Widget* sw;
+    bool isDebuggerCreated = false;
+    static MainWindow* getMainWindowContext();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -44,7 +46,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    Debugger *debugWindow;
+    Debugger *debugWindow = nullptr;
     Settings *settingsWindow;
     void sendRom(Debugger *debugWindow);
     unsigned int fileSize;

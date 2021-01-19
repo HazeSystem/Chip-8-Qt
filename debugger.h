@@ -30,12 +30,12 @@ class Debugger : public QMainWindow
 public:
     explicit Debugger(QWidget *parent = nullptr);
     ~Debugger();
-    bool disassembleRom(QString filepath);
+    void disassembleRom(QString filepath);
     void updateWidgets();
-//    static Debugger* getDebugContext();
+    static Debugger* getDebugContext();
+    bool loaded = false;
 
 protected:
-    void showEvent(QShowEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
     void changeEvent(QEvent *event) override;
 //    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
@@ -45,19 +45,16 @@ private slots:
     void on_listWidget_2_itemSelectionChanged();
     void on_listWidget_3_itemSelectionChanged();
     void on_listWidget_4_itemSelectionChanged();
-    void init();
-
     void on_leftRegisterListWidget_itemDoubleClicked(QListWidgetItem *item);
-
     void on_rightRegisterListWidget_itemDoubleClicked(QListWidgetItem *item);
-
     void on_stackListWidget_itemDoubleClicked(QListWidgetItem *item);
 
 private:
     Ui::Debugger *ui;
-    void addDisassemblyViewItem(std::vector<QString> item);
-    void addRegisterViewItem();
-    void addStackViewItem();
+    void addDisassemblyViewItems(std::vector<std::vector<QString>> disasm);
+    void addRegisterViewItems();
+    void addStackViewItems();
+    void updateCurrentLine();
 };
 
 #endif // DEBUGGER_H

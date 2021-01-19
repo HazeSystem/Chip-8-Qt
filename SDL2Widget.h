@@ -20,10 +20,12 @@ public:
     static void recKey(int key, bool state);
     static Chip8* getC8Context();
     static SDL2Widget* getSDLContext();
+    bool running;
+
+public slots:
     void run();
     void breakPoint();
-
-    bool running;
+    void singleStep();
 
 private:
     QTimer* timer;

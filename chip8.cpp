@@ -34,7 +34,15 @@ void Chip8::init(std::vector<unsigned char> rom) {
 	sp = 0;
     rom_size = rom.size();
 
-	for (int i = 0; i < 2048; i++)
+    if (!gfx.empty() && !stack.empty() && !V.empty() && !memory.empty() && !key.empty()) {
+        gfx.clear();
+        stack.clear();
+        V.clear();
+        memory.clear();
+        key.clear();
+    }
+
+    for (int i = 0; i < 2048; i++)
         gfx.push_back(0);
 
 	for (int i = 0; i < 16; i++)
