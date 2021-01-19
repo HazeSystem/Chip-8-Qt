@@ -62,10 +62,12 @@ void Chip8::init(std::vector<unsigned char> rom) {
 
 void Chip8::emulateCycle() {
 	opcode = memory[pc] << 8 | memory[pc + 1];
-	unsigned short x = V[(opcode & 0x0F00) >> 8];
-	unsigned short y = V[(opcode & 0x00F0) >> 4];
-	unsigned short height = opcode & 0x000F;
-	unsigned short pixel;
+    unsigned char x = (opcode & 0x0F00) >> 8;
+    unsigned char y = (opcode & 0x00F0) >> 4;
+    unsigned char n = opcode & 0x000F;
+    unsigned short nn = opcode & 0x00FF;
+    unsigned short nnn = opcode & 0x0FFF;
+    unsigned char pixel;
 	bool keyPress = false;
 
 //    if (debug)
@@ -73,12 +75,12 @@ void Chip8::emulateCycle() {
 
 	switch (opcode & 0xF000) {
 	case 0x0000:
-		switch (opcode & 0x00FF) {
-        case 0x0000: // 0000: Does nothing for one cycle
+        switch (nn) {
+        case 0x00: // 0000: Does nothing for one cycle
             break;
 
-		case 0x00E0: // 00E0: Clears the screen.
-			for (int i = 0; i < 2048; ++i)
+        case 0xE0: // 00E0: Clears the screen.
+            for (int i = 0; i < 2048; i++)
 				gfx[i] = 0;
 			draw = true;
 			pc += 2;
@@ -87,180 +89,126 @@ void Chip8::emulateCycle() {
 				console.log("  " + "Screen cleared");*/
 			break;
 
-		case 0x00EE: // 00EE: Returns from a subroutine.
-			--sp;
-            pc = stack[sp] + 2;
+        case 0xEE: // 00EE: Returns from a subroutine.
+            pc = stack[--sp];
 
 			/*if (debug)
 				console.log("  " + "Returned to pc = " + Number(pc).toString(16));*/
 			break;
 		}
-
 		break;
 
 	case 0x1000: // 1NNN: Jumps to address NNN
-		pc = opcode & 0x0FFF;
+        pc = nnn;
 
 		/*if (debug)
 			console.log("  " + "pc = " + Number(pc).toString(16));*/
 		break;
 
 	case 0x2000: // 2NNN: Calls subroutine at NNN
-		stack[sp] = pc;
-		++sp;
-		pc = opcode & 0x0FFF;
+        stack[sp++] = pc + 2;
+        pc = nnn;
 
 		/*if (debug)
 			console.log("  " + "Push " + Number(stack[sp - 1]).toString(16) + " and call " + Number(pc).toString(16));*/
 		break;
 
 	case 0x3000: // 3XNN: Skips the next instruction if VX equals NN
-		if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
-			pc += 4;
-			//if (debug)
-			//	console.log("  " + "skipped = " + true);
-		}
-		else {
-			pc += 2;
-			/*			if (debug)
-							console.log("  " + "skipped = " + false); */
-		}
+        pc += (V[x] == nn) ? 4 : 2;
 		break;
 
 	case 0x4000: // 4XNN: Skips the next instruction if VX doesn't equal NN
-		if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
-			pc += 4;
-			/*if (debug)
-				console.log("  " + "skipped = " + true);*/
-		}
-		else {
-			pc += 2;
-			/*if (debug)
-				console.log("  " + "skipped = " + false);*/
-		}
+        pc += (V[x] != nn) ? 4 : 2;
 		break;
 
 	case 0x5000: // 5XY0: Skips the next instruction if VX equals VY
-		if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]) {
-			pc += 4;
-			/*if (debug)
-				console.log("  " + "skipped = " + true);*/
-		}
-		else {
-			pc += 2;
-			/*if (debug)
-				console.log("  " + "skipped = " + false);*/
-		}
-
+        pc += (V[x] == V[y]) ? 4 : 2;
 		break;
 
 	case 0x6000: // 6XNN: Sets VX to NN
-		V[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
+        V[x] = nn;
 		pc += 2;
 
 		/*if (debug)
-			console.log("  " + "V" + Number((opcode & 0x0F00) >> 8).toString(16) + " = " + Number(V[(opcode & 0x0F00) >> 8]).toString(16));*/
+            console.log("  " + "V" + Number(x).toString(16) + " = " + Number(V[x]).toString(16));*/
 		break;
 
 	case 0x7000: // 7XNN: Adds NN to VX. (Carry flag is not changed)
 	/*	if (debug)
-			console.log("  " + "V" + ((opcode & 0x0F00) >> 8) + " = " + V[(opcode & 0x0F00) >> 8] + " + " + (opcode & 0x00FF) + " = ");*/
-		V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
+            console.log("  " + "V" + (x) + " = " + V[x] + " + " + (nn) + " = ");*/
+        V[x] += nn;
 		pc += 2;
 
 		//if (debug)
-		//	console.log("  " + V[((opcode & 0x0F00) >> 8)]);
+        //	console.log("  " + V[(x)]);
 		break;
 
 	case 0x8000:
-		switch (opcode & 0x000F) {
-		case 0x0000: // 8XY0: Sets VX to the value of VY
-			V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
+        switch (n) {
+        case 0x0: // 8XY0: Sets VX to the value of VY
+            V[x] = V[y];
 			pc += 2;
 			break;
 
-		case 0x0001: // 8XY1: Sets VX to VX or VY
-			V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] | V[(opcode & 0x00F0) >> 4];
+        case 0x1: // 8XY1: Sets VX to VX or VY
+            V[x] = V[x] | V[y];
 			pc += 2;
 			break;
 
-		case 0x0002: // 8XY2: Sets VX to VX and VY
-			V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4];
+        case 0x2: // 8XY2: Sets VX to VX and VY
+            V[x] = V[x] & V[y];
 			pc += 2;
 			break;
 
-		case 0x0003: // 8XY3: Sets VX to VX xor VY
-			V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] ^ V[(opcode & 0x00F0) >> 4];
+        case 0x3: // 8XY3: Sets VX to VX xor VY
+            V[x] = V[x] ^ V[y];
 			pc += 2;
 			break;
 
-		case 0x0004: // 8XY4: Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
-			if (V[(opcode & 0x00F0) >> 4] > (0xFF - V[(opcode & 0x0F00) >> 8]))
-				V[0xF] = 1; //carry
-			else
-				V[0xF] = 0;
-
-			V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
+        case 0x4: // 8XY4: Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
+            V[0xF] = (V[x] + V[y]) > 0xFF ? 1 : 0;
+            V[x] += V[y];
 			pc += 2;
 			break;
 
-		case 0x0005: // 8XY5: VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-			if (V[(opcode & 0x00F0) >> 4] > V[(opcode & 0x0F00) >> 8])
-				V[0xF] = 0;
-			else
-				V[0xF] = 1;
-
-			V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
+        case 0x5: // 8XY5: VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
+            V[0xF] = (V[x] > V[y]) ? 1 : 0;
+            V[x] -= V[y];
 			pc += 2;
 			break;
 
-		case 0x0006: // 8XZ6: Stores the least significant bit of VX in VF and then shifts VX to the right by 1
-			V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x01;
-			V[(opcode & 0x0F00) >> 8] >>= 1;
+        case 0x6: // 8XZ6: Stores the least significant bit of VX in VF and then shifts VX to the right by 1
+            V[0xF] = V[x] & 0x01;
+            V[x] >>= 1;
 			pc += 2;
 
 			//if (debug)
-			//	console.log("  " + "Stored lsb of V" + Number((opcode & 0x0F00) >> 8).toString(16) + " = " + V[(opcode & 0x0F00) >> 8] + " in VF as " + V[0xF]);
+            //	console.log("  " + "Stored lsb of V" + Number(x).toString(16) + " = " + V[x] + " in VF as " + V[0xF]);
 			break;
 
-		case 0x0007: // 8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
-			if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4])
-				V[0xF] = 0;
-			else
-				V[0xF] = 1;
-
-			V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8];
+        case 0x7: // 8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
+            V[0xF] = (V[x] > V[y]) ? 0 : 1;
+            V[x] = V[y] - V[x];
 			pc += 2;
 			break;
 
-		case 0x000E: // 8XZE: Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
-			V[0xF] = V[(opcode & 0x0F00) >> 8] >> 7;
-			V[(opcode & 0x0F00) >> 8] <<= 1;
+        case 0xE: // 8XZE: Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
+            V[0xF] = V[x] >> 7;
+            V[x] <<= 1;
 			pc += 2;
 
 			//if (debug)
-			//	console.log("  " + "Stored msb of V" + Number((opcode & 0x0F00) >> 8).toString(16) + " = " + V[(opcode & 0x0F00) >> 8] + " in VF as " + V[0xF]);
+            //	console.log("  " + "Stored msb of V" + Number(x).toString(16) + " = " + V[x] + " in VF as " + V[0xF]);
 			break;
 		}
-
 		break;
 
 	case 0x9000: // 9XY0: Skips the next instruction if VX doesn't equal VY
-		if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]) {
-			pc += 4;
-			//if (debug)
-			//	console.log("  " + "skipped = " + true);
-		}
-		else {
-			pc += 2;
-			//if (debug)
-			//	console.log("  " + "skipped = " + false);
-		}
-
-		break;
+        pc += (V[x] != V[y]) ? 4 : 2;
+        break;
 
 	case 0xA000: // ANNN: Sets I to the address NNN
-		I = opcode & 0x0FFF;
+        I = nnn;
 		pc += 2;
 
 		//if (debug)
@@ -268,31 +216,30 @@ void Chip8::emulateCycle() {
 		break;
 
 	case 0xB000: // BNNN: Jumps to the address NNN plus V0
-		pc = V[0x0] + (opcode & 0x0FFF);
+        pc = V[0x0] + nnn;
 		break;
 
 	case 0xC000: // CXNN: Sets VX to the result of a bitwise and operation on a random number and NN.
-		V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF) & distribution(generator);
+        V[x] = (nn) & distribution(generator);
 		pc += 2;
 
 		//if (debug)
-		//	console.log("  " + "V" + ((opcode & 0x0F00) >> 8) + " = " + V[(opcode & 0x0F00) >> 8]);
+        //	console.log("  " + "V" + (x) + " = " + V[x]);
 		break;
 
 	case 0xD000: // DXYN: Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N+1 pixels
 		V[0xF] = 0;
-		for (int h = 0; h < height; h++) {
+        for (int h = 0; h < n; h++) {
 			pixel = memory[I + h];
 
 			for (int w = 0; w < 8; w++) {
 				if ((pixel & (0x80 >> w)) != 0) {
-					if (gfx[(x + w + ((y + h) * 64))] == 1)
+                    if (gfx[(V[x] + w + ((V[y] + h) * 64))] == 1)
 						V[0xF] = 1;
-					gfx[(x + w + ((y + h) * 64))] ^= 1;
+                    gfx[(V[x] + w + ((V[y] + h) * 64))] ^= 1;
 				}
 			}
 		}
-
 		draw = true;
 		pc += 2;
 
@@ -301,35 +248,28 @@ void Chip8::emulateCycle() {
 		break;
 
 	case 0xE000:
-		switch (opcode & 0x00FF) {
-		case 0x009E: // EX9E: Skips the next instruction if the key stored in VX is pressed
-			if (key[V[(opcode & 0x0F00) >> 8]] == 1)
-				pc += 4;
-			else
-				pc += 2;
-			break;
+        switch (nn) {
+        case 0x9E: // EX9E: Skips the next instruction if the key stored in VX is pressed
+            pc += (key[V[x]] == 1) ? 4 : 2;
+            break;
 
-		case 0x00A1: // EXA1: Skips the next instruction if the key stored in VX isn't pressed
-			if (key[V[(opcode & 0x0F00) >> 8]] == 0)
-				pc += 4;
-			else
-				pc += 2;
+        case 0xA1: // EXA1: Skips the next instruction if the key stored in VX isn't pressed
+            pc += (key[V[x]] == 0) ? 4 : 2;
 			break;
 		}
-
 		break;
 
 	case 0xF000:
-		switch (opcode & 0x00FF) {
-		case 0x0007: // FX07: Sets VX to the value of the delay timer
-			V[(opcode & 0x0F00) >> 8] = delay_timer;
+        switch (nn) {
+        case 0x07: // FX07: Sets VX to the value of the delay timer
+            V[x] = delay_timer;
 			pc += 2;
 			break;
 
-		case 0x000A: // FX0A: A key press is awaited, and then stored in VX 
+        case 0x0A: // FX0A: A key press is awaited, and then stored in VX
 			for (int i = 0; i < 16; ++i) {
 				if (key[i] != 0) {
-					V[(opcode & 0x0F00) >> 8] = i;
+                    V[x] = i;
 					keyPress = true;
 				}
 			}
@@ -340,63 +280,63 @@ void Chip8::emulateCycle() {
 			pc += 2;
 			break;
 
-		case 0x0015: // FX15: Sets the delay timer to VX
-			delay_timer = V[(opcode & 0x0F00) >> 8];
+        case 0x15: // FX15: Sets the delay timer to VX
+            delay_timer = V[x];
 			pc += 2;
 			break;
 
-		case 0x0018: // FX18: Sets the sound timer to VX
-			sound_timer = V[(opcode & 0x0F00) >> 8];
+        case 0x18: // FX18: Sets the sound timer to VX
+            sound_timer = V[x];
 			pc += 2;
 			break;
 
-		case 0x001E: // FX1E: Adds VX to I
-			I += V[(opcode & 0x0F00) >> 8];
+        case 0x1E: // FX1E: Adds VX to I
+            I += V[x];
 			pc += 2;
 
 			//if (debug)
-			//	console.log("  " + "Added V" + Number((opcode & 0x0F00) >> 8).toString(16) + " = " + V[(opcode & 0x0F00) >> 8] + " to I: " + Number(I).toString(16));
+            //	console.log("  " + "Added V" + Number(x).toString(16) + " = " + V[x] + " to I: " + Number(I).toString(16));
 			break;
 
-		case 0x0029: // FX29: Sets I to the location of the sprite for the character in VX. Characters 0x0-0xF are represented by a 4x5 font
-			I = 0x50 + ((V[(opcode & 0x0F00) >> 8]) * 5);
+        case 0x29: // FX29: Sets I to the location of the sprite for the character in VX. Characters 0x0-0xF are represented by a 4x5 font
+            I = 0x50 + ((V[x]) * 5);
 			pc += 2;
 
 			//if (debug)
 			//	console.log("  " + "Set sprite addr I to " + Number(I).toString(16));
 			break;
 
-		case 0x0033: // FX33: Stores the binary-coded decimal representation of VX
-			memory[I] = (V[(opcode & 0x0F00) >> 8] / 100);
-			memory[I + 1] = (V[(opcode & 0x0F00) >> 8] / 10) % 10;
-			memory[I + 2] = (V[(opcode & 0x0F00) >> 8] % 100) % 10;
+        case 0x33: // FX33: Stores the binary-coded decimal representation of VX
+            memory[I] = (V[x] / 100);
+            memory[I + 1] = (V[x] / 10) % 10;
+            memory[I + 2] = (V[x] % 100) % 10;
 			pc += 2;
 			break;
 
-		case 0x0055: // FX55: Stores V0 to VX in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified
-			for (int i = 0; i < ((opcode & 0x0F00) >> 8) + 1; ++i)
+        case 0x55: // FX55: Stores V0 to VX in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified
+            for (int i = 0; i < (x) + 1; ++i)
 				memory[I + i] = V[i];
 
-			I += ((opcode & 0x0F00) >> 8) + 1;
+            I += (x) + 1;
 			pc += 2;
 
 			//if (debug)
-			//	console.log("  " + "Stored V0-V" + Number((opcode & 0x0F00) >> 8).toString(16) + ": " + V + " starting at I = " + Number(I).toString(16));
+            //	console.log("  " + "Stored V0-V" + Number(x).toString(16) + ": " + V + " starting at I = " + Number(I).toString(16));
 			break;
 
-		case 0x0065: // FX65: Fills V0 to VX with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified
-			for (int i = 0; i < ((opcode & 0x0F00) >> 8) + 1; ++i)
+        case 0x65: // FX65: Fills V0 to VX with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified
+            for (int i = 0; i < (x) + 1; ++i)
 				V[i] = memory[I + i];
 
-			I += ((opcode & 0x0F00) >> 8) + 1;
+            I += (x) + 1;
 			pc += 2;
 
 			//if (debug)
-			//	console.log("  " + "Filled V0-V" + Number((opcode & 0x0F00) >> 8).toString(16) + ": " + V + " starting at I = " + Number(I).toString(16));
+            //	console.log("  " + "Filled V0-V" + Number(x).toString(16) + ": " + V + " starting at I = " + Number(I).toString(16));
 			break;
 		}
-
 		break;
+
 	default:
 		//console.log("Unimplemented opcode: " + Number(opcode).toString(16));
 		printf("Unimplemented opcode: %x", opcode);
