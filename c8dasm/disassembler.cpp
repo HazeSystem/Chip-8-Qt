@@ -24,10 +24,10 @@ void Disassembler::parseOpcode(std::string pc, std::string opcode, const std::st
 // return the string representation of an opcode
 void Disassembler::storeOpcode(uint16_t pc, uint16_t opcode) {
     // decode the opcode
-    auto addr = (opcode & 0x0fff);
-    auto x = (opcode & 0x0f00) >> 8;
-    auto y = (opcode & 0x00f0) >> 4;
-    auto value = (opcode & 0x00ff);
+    auto addr = (opcode & 0x0FFF);
+    auto x = (opcode & 0x0F00) >> 8;
+    auto y = (opcode & 0x00F0) >> 4;
+    auto value = (opcode & 0x00FF);
     auto group = (opcode & 0xF000);
 
     // retrieve the instruction from the opcode value
@@ -40,7 +40,7 @@ void Disassembler::storeOpcode(uint16_t pc, uint16_t opcode) {
             case 0x00E0:    // CLS
                 program.push_back({QString::fromStdString(std::to_string(pc)), QString::fromStdString(std::to_string(opcode)), "CLS", ""});
                 break;
-            case 0x00EE:   // RET
+            case 0x00EE:    // RET
                 program.push_back({QString::fromStdString(std::to_string(pc)), QString::fromStdString(std::to_string(opcode)), "RET", ""});
                 break;
         default:
@@ -148,10 +148,10 @@ void Disassembler::storeOpcode(uint16_t pc, uint16_t opcode) {
                 parseOpcode(std::to_string(pc), std::to_string(opcode), "DB %004X", opcode);
                 break;
             }
+            break;
 
         case 0xF000:
-            switch (opcode & 0x00FF)
-            {
+            switch (opcode & 0x00FF) {
                 case 0x0007:    // LD Vx, DT
                     parseOpcode(std::to_string(pc), std::to_string(opcode), "LD V%X, DT", x);
                     break;
@@ -183,8 +183,9 @@ void Disassembler::storeOpcode(uint16_t pc, uint16_t opcode) {
                 parseOpcode(std::to_string(pc), std::to_string(opcode), "DB %004X", opcode);
                 break;
             }
-//    default:
-//        parseOpcode(std::to_string(pc), std::to_string(opcode), "DB %004X", opcode);
+            break;
+    default:
+        parseOpcode(std::to_string(pc), std::to_string(opcode), "DB %004X", opcode);
         break;
     }
 }

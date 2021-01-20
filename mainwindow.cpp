@@ -8,6 +8,7 @@ QString filepath;
 std::vector<unsigned char> rom_out;
 Debugger* dbg;
 MainWindow* mainctx;
+bool romLoaded = false;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
@@ -79,7 +80,7 @@ void MainWindow::openRom() {
        return;
 
     while (!file.atEnd()) {
-       rom.append(file.readLine());
+       rom = file.readAll();
     }
 
     if (!rom_out.empty())
@@ -89,15 +90,17 @@ void MainWindow::openRom() {
         rom_out.push_back(rom[i]);
 
     rom.clear();
+    romLoaded = true;;
 
     sw = SDL2Widget::getSDLContext();
     sw->running = true;
 
     sw->loadRom(rom_out);
+    sw->breakPoint();
 }
 
 void MainWindow::openDebugger() {
-    if (!isDebuggerCreated) {
+    if (romLoaded && !isDebuggerCreated) {
         debugWindow = new Debugger();
         dbg = debugWindow;
 
@@ -107,7 +110,7 @@ void MainWindow::openDebugger() {
         }
         debugWindow->show();
     }
-    else if (isDebuggerCreated) {
+    else if (romLoaded && isDebuggerCreated) {
         if (debugWindow->isVisible())
             debugWindow->activateWindow();
         else
@@ -129,6 +132,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event) {
-    if (!rom_out.empty() && !sw->running)
+    if (!rom_out.empty())
         sw->run();
 }

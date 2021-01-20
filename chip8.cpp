@@ -26,7 +26,7 @@ std::vector<unsigned char> font {
 };
 
 void Chip8::init(std::vector<unsigned char> rom) {
-    debug = true;
+    debug = false;
 
 	pc = 0x200;
 	opcode = 0;
@@ -78,8 +78,8 @@ void Chip8::emulateCycle() {
     unsigned char pixel;
 	bool keyPress = false;
 
-//    if (debug)
-//        std::cout << std::hex << "$" << pc << " " << opcode << std::endl;
+    if (debug)
+        qDebug() << Qt::hex << "$" << pc << " " << opcode << Qt::endl;
 
 	switch (opcode & 0xF000) {
 	case 0x0000:
@@ -93,15 +93,15 @@ void Chip8::emulateCycle() {
 			draw = true;
 			pc += 2;
 
-			/*if (debug)
-				console.log("  " + "Screen cleared");*/
+            if (debug)
+                qDebug() << "  " << "Screen cleared";
 			break;
 
         case 0xEE: // 00EE: Returns from a subroutine.
             pc = stack[--sp];
 
-			/*if (debug)
-				console.log("  " + "Returned to pc = " + Number(pc).toString(16));*/
+            if (debug)
+                qDebug() << "  " << "Returned to pc = " << Qt::hex << pc;
 			break;
 		}
 		break;
@@ -109,20 +109,23 @@ void Chip8::emulateCycle() {
 	case 0x1000: // 1NNN: Jumps to address NNN
         pc = nnn;
 
-		/*if (debug)
-			console.log("  " + "pc = " + Number(pc).toString(16));*/
+        if (debug)
+            qDebug() << "  " << "pc = " << Qt::hex << pc;
 		break;
 
 	case 0x2000: // 2NNN: Calls subroutine at NNN
         stack[sp++] = pc + 2;
         pc = nnn;
 
-		/*if (debug)
-			console.log("  " + "Push " + Number(stack[sp - 1]).toString(16) + " and call " + Number(pc).toString(16));*/
+        if (debug)
+            qDebug() << "  " << "Push " << Qt::hex << stack[sp - 1] << " and call " << pc;
 		break;
 
 	case 0x3000: // 3XNN: Skips the next instruction if VX equals NN
         pc += (V[x] == nn) ? 4 : 2;
+
+//        if (debug)
+//            qDebug() << "  " << "pc = "
 		break;
 
 	case 0x4000: // 4XNN: Skips the next instruction if VX doesn't equal NN
@@ -137,18 +140,18 @@ void Chip8::emulateCycle() {
         V[x] = nn;
 		pc += 2;
 
-		/*if (debug)
-            console.log("  " + "V" + Number(x).toString(16) + " = " + Number(V[x]).toString(16));*/
+        if (debug)
+            qDebug() << "  " << "V" << Qt::hex << x << " = " << Qt::hex << V[x];
 		break;
 
 	case 0x7000: // 7XNN: Adds NN to VX. (Carry flag is not changed)
-	/*	if (debug)
-            console.log("  " + "V" + (x) + " = " + V[x] + " + " + (nn) + " = ");*/
+        if (debug)
+            qDebug() << "  " << "V" << x << " = " << V[x] << " + " << nn << " = ";
         V[x] += nn;
 		pc += 2;
 
-		//if (debug)
-        //	console.log("  " + V[(x)]);
+        if (debug)
+            qDebug() << "  " << V[x];
 		break;
 
 	case 0x8000:
@@ -191,7 +194,7 @@ void Chip8::emulateCycle() {
 			pc += 2;
 
 			//if (debug)
-            //	console.log("  " + "Stored lsb of V" + Number(x).toString(16) + " = " + V[x] + " in VF as " + V[0xF]);
+            //	qDebug() << "  " + "Stored lsb of V" << Qt::hex << x + " = " + V[x] + " in VF as " + V[0xF]);
 			break;
 
         case 0x7: // 8XY7: Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
@@ -206,7 +209,7 @@ void Chip8::emulateCycle() {
 			pc += 2;
 
 			//if (debug)
-            //	console.log("  " + "Stored msb of V" + Number(x).toString(16) + " = " + V[x] + " in VF as " + V[0xF]);
+            //	qDebug() << "  " + "Stored msb of V" << Qt::hex << x + " = " + V[x] + " in VF as " + V[0xF]);
 			break;
 		}
 		break;
@@ -220,7 +223,7 @@ void Chip8::emulateCycle() {
 		pc += 2;
 
 		//if (debug)
-		//	console.log("  " + "I = " + Number(I).toString(16));
+        //	qDebug() << "  " + "I = " << Qt::hex << I);
 		break;
 
 	case 0xB000: // BNNN: Jumps to the address NNN plus V0
@@ -232,7 +235,7 @@ void Chip8::emulateCycle() {
 		pc += 2;
 
 		//if (debug)
-        //	console.log("  " + "V" + (x) + " = " + V[x]);
+        //	qDebug() << "  " + "V" + (x) + " = " + V[x]);
 		break;
 
 	case 0xD000: // DXYN: Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N+1 pixels
@@ -252,7 +255,7 @@ void Chip8::emulateCycle() {
 		pc += 2;
 
 		//if (debug)
-		//	console.log("  " + "Draw sprite at (" + x + "," + y + ")" + " with height " + height);
+        //	qDebug() << "  " + "Draw sprite at (" + x + "," + y + ")" + " with height " + height);
 		break;
 
 	case 0xE000:
@@ -303,7 +306,7 @@ void Chip8::emulateCycle() {
 			pc += 2;
 
 			//if (debug)
-            //	console.log("  " + "Added V" + Number(x).toString(16) + " = " + V[x] + " to I: " + Number(I).toString(16));
+            //	qDebug() << "  " + "Added V" << Qt::hex << x + " = " + V[x] + " to I: " << Qt::hex << I);
 			break;
 
         case 0x29: // FX29: Sets I to the location of the sprite for the character in VX. Characters 0x0-0xF are represented by a 4x5 font
@@ -311,7 +314,7 @@ void Chip8::emulateCycle() {
 			pc += 2;
 
 			//if (debug)
-			//	console.log("  " + "Set sprite addr I to " + Number(I).toString(16));
+            //	qDebug() << "  " + "Set sprite addr I to " << Qt::hex << I);
 			break;
 
         case 0x33: // FX33: Stores the binary-coded decimal representation of VX
@@ -329,7 +332,7 @@ void Chip8::emulateCycle() {
 			pc += 2;
 
 			//if (debug)
-            //	console.log("  " + "Stored V0-V" + Number(x).toString(16) + ": " + V + " starting at I = " + Number(I).toString(16));
+            //	qDebug() << "  " + "Stored V0-V" << Qt::hex << x + ": " + V + " starting at I = " << Qt::hex << I);
 			break;
 
         case 0x65: // FX65: Fills V0 to VX with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified
@@ -340,13 +343,13 @@ void Chip8::emulateCycle() {
 			pc += 2;
 
 			//if (debug)
-            //	console.log("  " + "Filled V0-V" + Number(x).toString(16) + ": " + V + " starting at I = " + Number(I).toString(16));
+            //	qDebug() << "  " + "Filled V0-V" << Qt::hex << x + ": " + V + " starting at I = " << Qt::hex << I);
 			break;
 		}
 		break;
 
 	default:
-		//console.log("Unimplemented opcode: " + Number(opcode).toString(16));
+        //qDebug() << "Unimplemented opcode: " << Qt::hex << opcode);
 		printf("Unimplemented opcode: %x", opcode);
 	}
 

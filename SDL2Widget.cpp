@@ -1,5 +1,6 @@
 #include "SDL2Widget.h"
 #include <QPointer>
+#include <chrono>
 
 SDL_AudioSpec wavSpec;
 Uint32 wavLength;
@@ -16,6 +17,7 @@ Chip8 c8;
 SDL2Widget *sw;
 Debugger *debug;
 bool loaded = false;
+bool animate = false;
 
 SDL2Widget::SDL2Widget(QWidget* parent) : QWidget(parent) {
     sw = this;
@@ -47,11 +49,9 @@ SDL2Widget::SDL2Widget(QWidget* parent) : QWidget(parent) {
         qDebug() << "error loading audio";
     deviceId = SDL_OpenAudioDevice(NULL, 0, &wavSpec, NULL, 0);
 
-    running = true;
-
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(mainLoop()));
-    timer->start(1000 / SCREEN_FPS);
+//    timer->start(1000 / SCREEN_FPS);
 }
 
 SDL2Widget::~SDL2Widget() {
@@ -242,10 +242,10 @@ void SDL2Widget::mainLoop() {
         c8.emulateCycle();
 
     if (debug) {
-        if (loaded && debug->loaded)
+        if (loaded && debug->loaded && animate) {
             debug->updateWidgets();
-        if (debug->getAnimate())
             debug->updateCurrentLine();
+        }
     }
 
     if (loaded && c8.draw)
@@ -271,22 +271,21 @@ void SDL2Widget::loadRom(std::vector<unsigned char> rom) {
 
 void SDL2Widget::run() {
     if (loaded) {
+        animate = false;
         this->activateWindow();
         timer->start(1000 / SCREEN_FPS);
-        running = true;
     }
 }
 
 void SDL2Widget::breakPoint() {
     if (loaded) {
         timer->stop();
-        running = false;
     }
 }
 
 void SDL2Widget::singleStep() {
     if (loaded) {
+        animate = true;
         mainLoop();
-        debug->updateCurrentLine();
     }
 }

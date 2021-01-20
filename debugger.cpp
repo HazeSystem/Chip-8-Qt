@@ -8,11 +8,24 @@
 
 #include <QInputDialog>
 #include <QMainWindow>
+#include <algorithm>
+#include <iterator>
+//#include <chrono>
+
+//double total = 0;
 
 std::vector<std::vector<QString>> disassembly;
 std::vector<unsigned char> disassemblyViewBuffer;
 std::vector<QString> regBuffer;
 bool empty;
+
+std::vector<unsigned char> oldV;
+unsigned short pcOld, iOld;
+unsigned char spOld, dtOld, stOld;
+std::vector<unsigned short> oldStack;
+
+bool regsLoaded = false;
+bool stackLoaded = false;
 size_t ram_size;
 
 Chip8 *chip8;
@@ -81,8 +94,11 @@ void Debugger::disassembleRom(QString filepath) {
     for (size_t i = 0; i < ram_size; i++)
         hexViewBuffer.push_back(chip8->memory[i]);
 
-    for (unsigned int i = 0; i < ram_size; i++)
-        disassemblyViewBuffer.push_back(chip8->memory[i]);
+//    for (unsigned int i = 0; i < ram_size; i++)
+//        disassemblyViewBuffer.push_back(chip8->memory[i]);
+
+    for (unsigned int i = 0; i < 0x182; i++)
+        disassemblyViewBuffer.push_back(chip8->memory[i+0x200]);
 
     disassembly = c8dasm.Disassemble(disassemblyViewBuffer);
 
@@ -102,7 +118,7 @@ void Debugger::updateWidgets() {
 }
 
 void Debugger::updateCurrentLine() {
-    ui->listWidget->scrollToItem(ui->listWidget->item(chip8->pc / 2), QAbstractItemView::PositionAtCenter);
+    ui->listWidget->scrollToItem(ui->listWidget->item(chip8->pc / 2), QAbstractItemView::EnsureVisible);
     ui->listWidget->setCurrentRow(chip8->pc / 2);
 }
 
@@ -139,26 +155,88 @@ void Debugger::addDisassemblyViewItems(std::vector<std::vector<QString>> disasm)
 }
 
 void Debugger::addRegisterViewItems() {
-    if (ui->leftRegisterListWidget->count()) {
-        ui->leftRegisterListWidget->clear();
-        ui->rightRegisterListWidget->clear();
+//    using namespace std::chrono;
+//    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
+
+    for (int i = 0; i < 16; i++) {
+        unsigned char v = chip8->V[i];
+        if (!regsLoaded)
+            ui->leftRegisterListWidget->addItem(QString("V%1= ").arg(i, 0, 16).toUpper() + QString("%1").arg(v, 4, 16, QChar{'0'}).toUpper());
+        else {
+            if (v != oldV[i]) {
+                ui->leftRegisterListWidget->item(i)->setText(QString("V%1= ").arg(i, 0, 16).toUpper() + QString("%1").arg(v, 4, 16, QChar{'0'}).toUpper());
+                oldV[i] = v;
+            }
+        }
     }
 
-    for (int i = 0; i < 16; i++)
-        ui->leftRegisterListWidget->addItem(QString("V%1= ").arg(i, 0, 16).toUpper() + QString("%1").arg(chip8->V[i], 4, 16, QChar{'0'}).toUpper());
+    if (!regsLoaded) {
+        ui->rightRegisterListWidget->addItem(QString("I=  ") + QString("%1").arg(chip8->I,  4, 16, QChar{'0'}).toUpper());
+        ui->rightRegisterListWidget->addItem(QString("SP= ") + QString("%1").arg(chip8->sp, 4, 16, QChar{'0'}).toUpper());
+        ui->rightRegisterListWidget->addItem(QString("PC= ") + QString("%1").arg(chip8->pc, 4, 16, QChar{'0'}).toUpper());
+        ui->rightRegisterListWidget->addItem(QString("DT= ") + QString("%1").arg(chip8->delay_timer, 4, 16, QChar{'0'}).toUpper());
+        ui->rightRegisterListWidget->addItem(QString("ST= ") + QString("%1").arg(chip8->sound_timer, 4, 16, QChar{'0'}).toUpper());
+    }
+    else {
+        if (chip8->I != iOld) {
+            ui->rightRegisterListWidget->item(0)->setText(QString("I=  ") + QString("%1").arg(chip8->I,  4, 16, QChar{'0'}).toUpper());
+            pcOld = chip8->pc;
+        }
+        if (chip8->sp != spOld) {
+            ui->rightRegisterListWidget->item(1)->setText(QString("SP= ") + QString("%1").arg(chip8->sp,  4, 16, QChar{'0'}).toUpper());
+            iOld = chip8->I;
+        }
+        if (chip8->pc != pcOld) {
+            ui->rightRegisterListWidget->item(2)->setText(QString("PC= ") + QString("%1").arg(chip8->pc,  4, 16, QChar{'0'}).toUpper());
+            spOld = chip8->sp;
+        }
+        if (chip8->delay_timer != dtOld) {
+            ui->rightRegisterListWidget->item(3)->setText(QString("DT= ") + QString("%1").arg(chip8->delay_timer,  4, 16, QChar{'0'}).toUpper());
+            dtOld = chip8->delay_timer;
+        }
+        if (chip8->sound_timer != stOld) {
+            ui->rightRegisterListWidget->item(4)->setText(QString("ST= ") + QString("%1").arg(chip8->sound_timer,  4, 16, QChar{'0'}).toUpper());
+            stOld = chip8->sound_timer;
+        }
+    }
 
-    ui->rightRegisterListWidget->addItem(QString("I=  ") + QString("%1").arg(chip8->I, 4, 16, QChar{'0'}).toUpper());
-    ui->rightRegisterListWidget->addItem(QString("SP= ") + QString("%1").arg(chip8->sp, 4, 16, QChar{'0'}).toUpper());
-    ui->rightRegisterListWidget->addItem(QString("PC= ") + QString("%1").arg(chip8->pc, 4, 16, QChar{'0'}).toUpper());
-    ui->rightRegisterListWidget->addItem(QString("DT= ") + QString("%1").arg(chip8->delay_timer, 4, 16, QChar{'0'}).toUpper());
-    ui->rightRegisterListWidget->addItem(QString("ST= ") + QString("%1").arg(chip8->sound_timer, 4, 16, QChar{'0'}).toUpper());
+    if (!regsLoaded) {
+        std::copy(chip8->V.begin(), chip8->V.end(), back_inserter(oldV));
+        pcOld = chip8->pc;
+        iOld = chip8->I;
+        spOld = chip8->sp;
+        dtOld = chip8->delay_timer;
+        stOld = chip8->sound_timer;
+    }
+    regsLoaded = true;
+
+//    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+
+//    duration<double, std::milli> time_span = t2 - t1;
+
+//    total += time_span.count();
+//    if (total)
+//        qDebug() << "Total till now: " << total << " milliseconds.";
 }
 
 void Debugger::addStackViewItems() {
-    if (ui->stackListWidget->count())
-        ui->stackListWidget->clear();
-    for (int i = 0; i < 16; i++)
-        ui->stackListWidget->addItem(QString("%1= ").arg(i, 2, 16, QChar{'0'}).toUpper() + QString("%1").arg(chip8->stack[i], 4, 16, QChar{'0'}).toUpper());
+
+    for (int i = 0; i < 16; i++) {
+        unsigned short s = chip8->stack[i];
+        if (!stackLoaded)
+            ui->stackListWidget->addItem(QString("%1= ").arg(i, 2, 16).toUpper() + QString("%1").arg(s, 4, 16, QChar{'0'}).toUpper());
+        else {
+            if (s != oldStack[i]) {
+                ui->stackListWidget->item(i)->setText(QString("%1= ").arg(i, 2, 16).toUpper() + QString("%1").arg(s, 4, 16, QChar{'0'}).toUpper());
+                oldStack[i] = s;
+            }
+        }
+    }
+
+    if (!stackLoaded)
+        std::copy(chip8->stack.begin(), chip8->stack.end(), back_inserter(oldStack));
+    stackLoaded = true;
 }
 
 Debugger* Debugger::getDebugContext() {
@@ -298,10 +376,8 @@ void Debugger::changeEvent(QEvent *event)
     {
         if (this->isActiveWindow())
         {
-            if (sdl2->running) {
-                sdl2->breakPoint();
-                animate = false;
-            }
+            sdl2->breakPoint();
+            animate = false;
             if (chip8) {
                 updateWidgets();
                 updateCurrentLine();
