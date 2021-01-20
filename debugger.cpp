@@ -159,10 +159,10 @@ void Debugger::addRegisterViewItems() {
     for (int i = 0; i < 16; i++) {
         unsigned char v = chip8->V[i];
         if (!regsLoaded)
-            ui->leftRegisterListWidget->addItem(QString("V%1= ").arg(i, 0, 16).toUpper() + QString("%1").arg(v, 4, 16, QChar{'0'}).toUpper());
+            ui->leftRegisterListWidget->addItem(QString("V%1= ").arg(i, 0, 16).toUpper() + QString("%1").arg(v, 2, 16, QChar{'0'}).toUpper());
         else {
             if (v != oldV[i]) {
-                ui->leftRegisterListWidget->item(i)->setText(QString("V%1= ").arg(i, 0, 16).toUpper() + QString("%1").arg(v, 4, 16, QChar{'0'}).toUpper());
+                ui->leftRegisterListWidget->item(i)->setText(QString("V%1= ").arg(i, 0, 16).toUpper() + QString("%1").arg(v, 2, 16, QChar{'0'}).toUpper());
                 oldV[i] = v;
             }
         }
@@ -170,10 +170,10 @@ void Debugger::addRegisterViewItems() {
 
     if (!regsLoaded) {
         ui->rightRegisterListWidget->addItem(QString("I=  ") + QString("%1").arg(chip8->I,  4, 16, QChar{'0'}).toUpper());
-        ui->rightRegisterListWidget->addItem(QString("SP= ") + QString("%1").arg(chip8->sp, 4, 16, QChar{'0'}).toUpper());
+        ui->rightRegisterListWidget->addItem(QString("SP= ") + QString("%1").arg(chip8->sp, 2, 16, QChar{'0'}).toUpper());
         ui->rightRegisterListWidget->addItem(QString("PC= ") + QString("%1").arg(chip8->pc, 4, 16, QChar{'0'}).toUpper());
-        ui->rightRegisterListWidget->addItem(QString("DT= ") + QString("%1").arg(chip8->delay_timer, 4, 16, QChar{'0'}).toUpper());
-        ui->rightRegisterListWidget->addItem(QString("ST= ") + QString("%1").arg(chip8->sound_timer, 4, 16, QChar{'0'}).toUpper());
+        ui->rightRegisterListWidget->addItem(QString("DT= ") + QString("%1").arg(chip8->delay_timer, 2, 16, QChar{'0'}).toUpper());
+        ui->rightRegisterListWidget->addItem(QString("ST= ") + QString("%1").arg(chip8->sound_timer, 2, 16, QChar{'0'}).toUpper());
     }
     else {
         if (chip8->I != iOld) {
@@ -181,7 +181,7 @@ void Debugger::addRegisterViewItems() {
             pcOld = chip8->pc;
         }
         if (chip8->sp != spOld) {
-            ui->rightRegisterListWidget->item(1)->setText(QString("SP= ") + QString("%1").arg(chip8->sp,  4, 16, QChar{'0'}).toUpper());
+            ui->rightRegisterListWidget->item(1)->setText(QString("SP= ") + QString("%1").arg(chip8->sp,  2, 16, QChar{'0'}).toUpper());
             iOld = chip8->I;
         }
         if (chip8->pc != pcOld) {
@@ -189,11 +189,11 @@ void Debugger::addRegisterViewItems() {
             spOld = chip8->sp;
         }
         if (chip8->delay_timer != dtOld) {
-            ui->rightRegisterListWidget->item(3)->setText(QString("DT= ") + QString("%1").arg(chip8->delay_timer,  4, 16, QChar{'0'}).toUpper());
+            ui->rightRegisterListWidget->item(3)->setText(QString("DT= ") + QString("%1").arg(chip8->delay_timer,  2, 16, QChar{'0'}).toUpper());
             dtOld = chip8->delay_timer;
         }
         if (chip8->sound_timer != stOld) {
-            ui->rightRegisterListWidget->item(4)->setText(QString("ST= ") + QString("%1").arg(chip8->sound_timer,  4, 16, QChar{'0'}).toUpper());
+            ui->rightRegisterListWidget->item(4)->setText(QString("ST= ") + QString("%1").arg(chip8->sound_timer,  2, 16, QChar{'0'}).toUpper());
             stOld = chip8->sound_timer;
         }
     }
@@ -286,12 +286,12 @@ void Debugger::on_leftRegisterListWidget_itemDoubleClicked(QListWidgetItem *item
 
     bool ok;
     QString text = QInputDialog::getText(this, tr("Edit register"),
-                                         tr("Enter text (hex only, '0x' optional"), QLineEdit::Normal,
+                                         tr("Enter hex ('0x' optional)"), QLineEdit::Normal,
                                          "", &ok);
 
     if (ok && !text.isEmpty()) {
-        unsigned short byte = std::stoul(text.toUtf8().constData(), nullptr, 16);
-        text = QString("V%1= ").arg(index, 0, 16).toUpper() + QString("%1").arg(byte, 4, 16, QChar{'0'}).toUpper();
+        unsigned char byte = std::stoul(text.toUtf8().constData(), nullptr, 16);
+        text = QString("V%1= ").arg(index, 0, 16).toUpper() + QString("%1").arg(byte, 2, 16, QChar{'0'}).toUpper();
 
         chip8->V[index] = byte;
         ui->leftRegisterListWidget->takeItem(index);
@@ -304,12 +304,11 @@ void Debugger::on_rightRegisterListWidget_itemDoubleClicked(QListWidgetItem *ite
 
     bool ok;
     QString text = QInputDialog::getText(this, tr("Edit register"),
-                                         tr("Enter text (hex only, '0x' optional"), QLineEdit::Normal,
+                                         tr("Enter hex ('0x' optional)"), QLineEdit::Normal,
                                          "", &ok);
 
     if (ok && !text.isEmpty()) {
         unsigned short byte = std::stoul(text.toUtf8().constData(), nullptr, 16);
-        text = QString("V%1= ").arg(index, 0, 16).toUpper() + QString("%1").arg(byte, 4, 16, QChar{'0'}).toUpper();
 
         switch (index) {
             case 0:
@@ -318,9 +317,11 @@ void Debugger::on_rightRegisterListWidget_itemDoubleClicked(QListWidgetItem *ite
                 ui->rightRegisterListWidget->insertItem(index, QString("I=  ") + QString("%1").arg(byte, 4, 16, QChar{'0'}).toUpper());
                 break;
             case 1:
+                if (byte > 0xFF)
+                    byte = 0x0;
                 chip8->sp = byte;
                 ui->rightRegisterListWidget->takeItem(index);
-                ui->rightRegisterListWidget->insertItem(index, QString("SP= ") + QString("%1").arg(byte, 4, 16, QChar{'0'}).toUpper());
+                ui->rightRegisterListWidget->insertItem(index, QString("SP= ") + QString("%1").arg(byte, 2, 16, QChar{'0'}).toUpper());
                 break;
             case 2:
                 chip8->pc = byte;
@@ -328,14 +329,18 @@ void Debugger::on_rightRegisterListWidget_itemDoubleClicked(QListWidgetItem *ite
                 ui->rightRegisterListWidget->insertItem(index, QString("PC= ") + QString("%1").arg(byte, 4, 16, QChar{'0'}).toUpper());
                 break;
             case 3:
+                if (byte > 0xFF)
+                    byte = 0x0;
                 chip8->delay_timer = byte;
                 ui->rightRegisterListWidget->takeItem(index);
-                ui->rightRegisterListWidget->insertItem(index, QString("DT= ") + QString("%1").arg(byte, 4, 16, QChar{'0'}).toUpper());
+                ui->rightRegisterListWidget->insertItem(index, QString("DT= ") + QString("%1").arg(byte, 2, 16, QChar{'0'}).toUpper());
                 break;
             case 4:
+                if (byte > 0xFF)
+                    byte = 0x0;
                 chip8->sound_timer = byte;
                 ui->rightRegisterListWidget->takeItem(index);
-                ui->rightRegisterListWidget->insertItem(index, QString("ST= ") + QString("%1").arg(byte, 4, 16, QChar{'0'}).toUpper());
+                ui->rightRegisterListWidget->insertItem(index, QString("ST= ") + QString("%1").arg(byte, 2, 16, QChar{'0'}).toUpper());
                 break;
         }
     }
@@ -346,7 +351,7 @@ void Debugger::on_stackListWidget_itemDoubleClicked(QListWidgetItem *item) {
 
     bool ok;
     QString text = QInputDialog::getText(this, tr("Edit register"),
-                                         tr("Enter text (hex only, '0x' optional"), QLineEdit::Normal,
+                                         tr("Enter hex ('0x' optional)"), QLineEdit::Normal,
                                          "", &ok);
 
     if (ok && !text.isEmpty()) {

@@ -9,9 +9,6 @@ std::vector<std::vector<QString>> C8Dasm::Disassemble(std::vector<unsigned char>
         // load the ROM
         c8dasm.rom_ = rom;
 
-        // analyze the code
-//        c8dasm.discover();
-
         // display the code
         c8dasm.render();
 

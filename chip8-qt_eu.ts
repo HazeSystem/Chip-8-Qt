@@ -10,14 +10,16 @@
     </message>
     <message>
         <location filename="debugger.ui" line="223"/>
-        <source>File</source>
-        <translation>Fitxategi</translation>
+        <source>&amp;File</source>
+        <oldsource>File</oldsource>
+        <translation>&amp;Fitxategi</translation>
     </message>
     <message>
         <location filename="debugger.ui" line="229"/>
         <location filename="debugger.ui" line="256"/>
-        <source>Run</source>
-        <translation type="unfinished"></translation>
+        <source>&amp;Run</source>
+        <oldsource>Run</oldsource>
+        <translation>&amp;Exekutatu</translation>
     </message>
     <message>
         <location filename="debugger.ui" line="240"/>
@@ -31,28 +33,30 @@
     </message>
     <message>
         <location filename="debugger.ui" line="248"/>
-        <source>Run to next line</source>
-        <translation type="unfinished"></translation>
+        <source>Run to &amp;next line</source>
+        <oldsource>Run to next line</oldsource>
+        <translation>Exekutatu lerro &amp;hurrengoraino</translation>
     </message>
     <message>
         <location filename="debugger.ui" line="251"/>
         <source>F3</source>
-        <translation type="unfinished"></translation>
+        <translation>F3</translation>
     </message>
     <message>
         <location filename="debugger.ui" line="259"/>
         <source>F9</source>
-        <translation type="unfinished"></translation>
+        <translation>F9</translation>
     </message>
     <message>
         <location filename="debugger.ui" line="264"/>
-        <source>Animate</source>
-        <translation type="unfinished"></translation>
+        <source>&amp;Animate</source>
+        <oldsource>Animate</oldsource>
+        <translation>&amp;Animatu</translation>
     </message>
     <message>
         <location filename="debugger.ui" line="267"/>
         <source>Alt+A</source>
-        <translation type="unfinished"></translation>
+        <translation>Alt-A</translation>
     </message>
     <message>
         <location filename="debugger.cpp" line="87"/>
@@ -62,16 +66,17 @@
     <message>
         <location filename="debugger.cpp" line="288"/>
         <location filename="debugger.cpp" line="306"/>
-        <location filename="debugger.cpp" line="348"/>
+        <location filename="debugger.cpp" line="353"/>
         <source>Edit register</source>
-        <translation type="unfinished"></translation>
+        <translation>Aldatu erregistroa</translation>
     </message>
     <message>
         <location filename="debugger.cpp" line="289"/>
         <location filename="debugger.cpp" line="307"/>
-        <location filename="debugger.cpp" line="349"/>
-        <source>Enter text (hex only, &apos;0x&apos; optional</source>
-        <translation type="unfinished"></translation>
+        <location filename="debugger.cpp" line="354"/>
+        <source>Enter hex (&apos;0x&apos; optional)</source>
+        <oldsource>Enter text (hex only, &apos;0x&apos; optional)</oldsource>
+        <translation>Idatzi zenbaki hamaseitarra (&apos;0x&apos; aukerakoa)</translation>
     </message>
 </context>
 <context>
@@ -83,13 +88,15 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="54"/>
-        <source>Debug</source>
-        <translation>Araztu</translation>
+        <source>&amp;Debug</source>
+        <oldsource>Debug</oldsource>
+        <translation>&amp;Araztu</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="60"/>
-        <source>File</source>
-        <translation>Fitxategi</translation>
+        <source>&amp;File</source>
+        <oldsource>File</oldsource>
+        <translation>&amp;Fitxategi</translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="73"/>
@@ -167,7 +174,7 @@
     <message>
         <location filename="settings.ui" line="93"/>
         <source>Requires restart to take effect</source>
-        <translation>Berrabiarazi eguneratzeko</translation>
+        <translation>Berrabiarazi aldatzeko</translation>
     </message>
 </context>
 </TS>

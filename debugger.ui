@@ -220,13 +220,13 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
-     <string>Run</string>
+     <string>&amp;Run</string>
     </property>
     <addaction name="actionRun"/>
     <addaction name="actionRun_to_Next_Line"/>
@@ -245,7 +245,7 @@
   </action>
   <action name="actionRun_to_Next_Line">
    <property name="text">
-    <string>Run to next line</string>
+    <string>Run to &amp;next line</string>
    </property>
    <property name="shortcut">
     <string>F3</string>
@@ -253,7 +253,7 @@
   </action>
   <action name="actionRun">
    <property name="text">
-    <string>Run</string>
+    <string>&amp;Run</string>
    </property>
    <property name="shortcut">
     <string>F9</string>
@@ -261,7 +261,7 @@
   </action>
   <action name="actionAnimate">
    <property name="text">
-    <string>Animate</string>
+    <string>&amp;Animate</string>
    </property>
    <property name="shortcut">
     <string>Alt+A</string>
