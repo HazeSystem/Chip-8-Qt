@@ -3,5 +3,7 @@ Emulator is complete, but debugger is still very much a work in progress. Curren
 
 Credit for the assembler and disassembler go to [aimktech](https://github.com/aimktech/chip8)!
 
+Gainera, programa eskuragarria da euskaraz.
+
 ![](/screenshots/emulator.png "emulator window")
 ![](/screenshots/debugger.png "debugger window")
