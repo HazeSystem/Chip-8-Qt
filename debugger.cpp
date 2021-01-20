@@ -94,11 +94,8 @@ void Debugger::disassembleRom(QString filepath) {
     for (size_t i = 0; i < ram_size; i++)
         hexViewBuffer.push_back(chip8->memory[i]);
 
-//    for (unsigned int i = 0; i < ram_size; i++)
-//        disassemblyViewBuffer.push_back(chip8->memory[i]);
-
-    for (unsigned int i = 0; i < 0x182; i++)
-        disassemblyViewBuffer.push_back(chip8->memory[i+0x200]);
+    for (unsigned int i = 0; i < ram_size; i++)
+        disassemblyViewBuffer.push_back(chip8->memory[i]);
 
     disassembly = c8dasm.Disassemble(disassemblyViewBuffer);
 

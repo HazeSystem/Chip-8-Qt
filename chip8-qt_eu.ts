@@ -4,29 +4,74 @@
 <context>
     <name>Debugger</name>
     <message>
-        <location filename="debugger.ui" line="20"/>
+        <location filename="debugger.ui" line="17"/>
         <source>Debugger</source>
         <translation>Araztaile</translation>
     </message>
     <message>
-        <location filename="debugger.ui" line="284"/>
+        <location filename="debugger.ui" line="223"/>
         <source>File</source>
         <translation>Fitxategi</translation>
     </message>
     <message>
-        <location filename="debugger.ui" line="292"/>
+        <location filename="debugger.ui" line="229"/>
+        <location filename="debugger.ui" line="256"/>
+        <source>Run</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="debugger.ui" line="240"/>
         <source>&amp;Exit</source>
         <translation>&amp;Irten</translation>
     </message>
     <message>
-        <location filename="debugger.ui" line="295"/>
+        <location filename="debugger.ui" line="243"/>
         <source>Esc</source>
         <translation>Esc</translation>
     </message>
     <message>
-        <location filename="debugger.cpp" line="73"/>
+        <location filename="debugger.ui" line="248"/>
+        <source>Run to next line</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="debugger.ui" line="251"/>
+        <source>F3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="debugger.ui" line="259"/>
+        <source>F9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="debugger.ui" line="264"/>
+        <source>Animate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="debugger.ui" line="267"/>
+        <source>Alt+A</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="debugger.cpp" line="87"/>
         <source>Chip-8 Qt debugger - %1</source>
         <translation>Chip-8 Qt araztaile - %1</translation>
+    </message>
+    <message>
+        <location filename="debugger.cpp" line="288"/>
+        <location filename="debugger.cpp" line="306"/>
+        <location filename="debugger.cpp" line="348"/>
+        <source>Edit register</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="debugger.cpp" line="289"/>
+        <location filename="debugger.cpp" line="307"/>
+        <location filename="debugger.cpp" line="349"/>
+        <source>Enter text (hex only, &apos;0x&apos; optional</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -87,12 +132,12 @@
         <translation>Ctrl+,</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="43"/>
+        <location filename="mainwindow.cpp" line="55"/>
         <source>Open Document</source>
         <translation>Ireki fitxategia</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="45"/>
+        <location filename="mainwindow.cpp" line="57"/>
         <source>Chip-8 ROM file (*.ch8)</source>
         <translation>Chip-8 ROM-fitxategi (*.ch8)</translation>
     </message>

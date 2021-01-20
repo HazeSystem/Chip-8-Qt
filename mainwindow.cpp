@@ -3,6 +3,9 @@
 #include "SDL2Widget.h"
 #include "chip8.h"
 
+#include<iostream>
+#include<fstream>
+
 QByteArray rom;
 QString filepath;
 std::vector<unsigned char> rom_out;
@@ -45,6 +48,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 
 void MainWindow::openRom() {
     isDebuggerCreated = false;
+    romLoaded = false;
 
     filepath =  QFileDialog::getOpenFileName(
               this,
@@ -57,45 +61,34 @@ void MainWindow::openRom() {
     }
 
     std::string filename = filepath.toUtf8().constData();
+    std::string fnFormatted = filename;
 
     // Remove directory if present.
     // Do this before extension removal incase directory has a period character.
-    const size_t last_slash_idx = filename.find_last_of("\\/");
+    const size_t last_slash_idx = fnFormatted.find_last_of("\\/");
     if (std::string::npos != last_slash_idx)
     {
-        filename.erase(0, last_slash_idx + 1);
+        fnFormatted.erase(0, last_slash_idx + 1);
     }
 
     // Remove extension if present.
-    const size_t period_idx = filename.rfind('.');
+    const size_t period_idx = fnFormatted.rfind('.');
     if (std::string::npos != period_idx)
     {
-        filename.erase(period_idx);
+        fnFormatted.erase(period_idx);
     }
 
-    this->setWindowTitle("Chip-8 Qt - " + QString::fromStdString(filename));
+    this->setWindowTitle("Chip-8 Qt - " + QString::fromStdString(fnFormatted));
 
-    QFile file(filepath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-       return;
+    std::ifstream input(filename, std::ios::binary);
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(input), {});
 
-    while (!file.atEnd()) {
-       rom = file.readAll();
-    }
-
-    if (!rom_out.empty())
-        rom_out.clear();
-
-    for (int i = 0; i < rom.size(); i++)
-        rom_out.push_back(rom[i]);
-
-    rom.clear();
-    romLoaded = true;;
+    romLoaded = true;
 
     sw = SDL2Widget::getSDLContext();
     sw->running = true;
 
-    sw->loadRom(rom_out);
+    sw->loadRom(buffer);
     sw->breakPoint();
 }
 
@@ -132,6 +125,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event) {
-    if (!rom_out.empty())
+    if (romLoaded)
         sw->run();
 }
