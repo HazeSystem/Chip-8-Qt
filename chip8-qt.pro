@@ -8,6 +8,10 @@ TARGET = chip8-qt
 DESTDIR = $$PWD/bin
 
 HEADERS += SDL2Widget.h \
+    c8asm/assembler.h \
+    c8asm/comphelpers.h \
+    c8asm/parser.h \
+    c8asm/types.h \
     c8dasm/c8dasm.h \
     c8dasm/disassembler.h \
     chip8.h \
@@ -30,6 +34,13 @@ HEADERS += SDL2Widget.h \
 
 SOURCES += main.cpp \
            SDL2Widget.cpp \
+           c8asm/arithm.cpp \
+           c8asm/assembler.cpp \
+           c8asm/jump.cpp \
+           c8asm/load.cpp \
+           c8asm/logic.cpp \
+           c8asm/misc.cpp \
+           c8asm/parser.cpp \
            c8dasm/c8dasm.cpp \
            c8dasm/disassembler.cpp \
            chip8.cpp \

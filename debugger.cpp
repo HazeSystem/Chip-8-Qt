@@ -2,6 +2,7 @@
 #include "ui_debugger.h"
 #include "mainwindow.h"
 #include "chip8.h"
+#include "c8asm/assembler.h"
 #include "c8dasm/c8dasm.h"
 #include "hexview/qhexview.h"
 #include "hexview/document/buffer/qmemorybuffer.h"
@@ -32,6 +33,8 @@ Chip8 *chip8;
 Debugger *dbgctx;
 SDL2Widget *sdl2;
 MainWindow *mainw;
+Assembler c8asm;
+
 QByteArray hexViewBuffer;
 bool documentLoaded = false;
 
@@ -190,9 +193,9 @@ void Debugger::addRegisterViewItems() {
 
     if (!regsLoaded) {
         std::copy(chip8->V.begin(), chip8->V.end(), back_inserter(oldV));
-        pcOld = chip8->pc;
         iOld = chip8->I;
         spOld = chip8->sp;
+        pcOld = chip8->pc;
         dtOld = chip8->delay_timer;
         stOld = chip8->sound_timer;
     }
@@ -212,10 +215,10 @@ void Debugger::addStackViewItems() {
     for (int i = 0; i < 16; i++) {
         unsigned short s = chip8->stack[i];
         if (!stackLoaded)
-            ui->stackListWidget->addItem(QString("%1 ").arg(i, 2, 16, QChar{'0'}).toUpper() + QString("%1").arg(s, 4, 16, QChar{'0'}).toUpper());
+            ui->stackListWidget->addItem(QString("%1  ").arg(i, 2, 16, QChar{'0'}).toUpper() + QString("%1").arg(s, 4, 16, QChar{'0'}).toUpper());
         else {
             if (s != oldStack[i]) {
-                ui->stackListWidget->item(i)->setText(QString("%1 ").arg(i, 2, 16, QChar{'0'}).toUpper() + QString("%1").arg(s, 4, 16, QChar{'0'}).toUpper());
+                ui->stackListWidget->item(i)->setText(QString("%1  ").arg(i, 2, 16, QChar{'0'}).toUpper() + QString("%1").arg(s, 4, 16, QChar{'0'}).toUpper());
                 oldStack[i] = s;
             }
         }
@@ -269,6 +272,20 @@ void Debugger::on_listWidget_4_itemSelectionChanged() {
     ui->listWidget->setCurrentRow(row);
     ui->listWidget_2->setCurrentRow(row);
     ui->listWidget_3->setCurrentRow(row);
+}
+
+void Debugger::on_listWidget_3_itemDoubleClicked(QListWidgetItem *item) {
+    std::string instruction;
+    int index = ui->listWidget_3->row(item);
+    instruction.append(item->text().toUtf8().constData());
+    instruction.append(" ");
+    instruction.append(ui->listWidget_4->item(index)->text().toUtf8().constData());
+    instruction.append("\n");
+    c8asm.compile(instruction);
+}
+
+void Debugger::on_listWidget_4_itemDoubleClicked(QListWidgetItem *item) {
+
 }
 
 void Debugger::on_leftRegisterListWidget_itemDoubleClicked(QListWidgetItem *item) {
@@ -357,17 +374,12 @@ void Debugger::on_stackListWidget_itemDoubleClicked(QListWidgetItem *item) {
 void Debugger::closeEvent(QCloseEvent *event) {
     QSettings settings("adalovegirls", "chip8-qt");
     settings.setValue("debug_geometry", saveGeometry());
-//    mainw = MainWindow::getMainWindowContext();
-//    mainw->isDebuggerCreated = false;
 }
 
-void Debugger::changeEvent(QEvent *event)
-{
+void Debugger::changeEvent(QEvent *event) {
     QWidget::changeEvent(event);
-    if (event->type() == QEvent::ActivationChange)
-    {
-        if (this->isActiveWindow())
-        {
+    if (event->type() == QEvent::ActivationChange) {
+        if (this->isActiveWindow()) {
             sdl2->breakPoint();
             animate = false;
             if (chip8) {
