@@ -64,7 +64,7 @@ Assembler::~Assembler()
 // compile an ASM file
 uint16_t Assembler::compile(std::string instruction)
 {
-    // create a new parser
+        // create a new parser
     Parser* p = new (std::nothrow) Parser(instruction);
     if( p == nullptr )
         throw std::string("Unable to allocate memory for the parser.");

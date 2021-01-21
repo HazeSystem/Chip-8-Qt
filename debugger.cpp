@@ -33,7 +33,6 @@ Chip8 *chip8;
 Debugger *dbgctx;
 SDL2Widget *sdl2;
 MainWindow *mainw;
-Assembler c8asm;
 
 QByteArray hexViewBuffer;
 bool documentLoaded = false;
@@ -120,6 +119,15 @@ void Debugger::updateWidgets() {
 void Debugger::updateCurrentLine() {
     ui->listWidget->scrollToItem(ui->listWidget->item(chip8->pc / 2), QAbstractItemView::EnsureVisible);
     ui->listWidget->setCurrentRow(chip8->pc / 2);
+}
+
+void Debugger::updateDisassemblyViewItem(int index, QString text) {
+    size_t found  = text.indexOf(' ');
+    QString op    = text.left(found);
+    QString arg   = text.mid(found+1, text.size());
+
+    ui->listWidget_3->item(index)->setText(op);
+    ui->listWidget_4->item(index)->setText(arg);
 }
 
 void Debugger::addDisassemblyViewItems(std::vector<std::vector<QString>> disasm) {
@@ -275,17 +283,50 @@ void Debugger::on_listWidget_4_itemSelectionChanged() {
 }
 
 void Debugger::on_listWidget_3_itemDoubleClicked(QListWidgetItem *item) {
+    Assembler c8asm;
     std::string instruction;
+
     int index = ui->listWidget_3->row(item);
-    instruction.append(item->text().toUtf8().constData());
-    instruction.append(" ");
-    instruction.append(ui->listWidget_4->item(index)->text().toUtf8().constData());
-    instruction.append("\n");
-    c8asm.compile(instruction);
+
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("Edit instruction"),
+                                         tr("Enter instruction"), QLineEdit::Normal,
+                                         "", &ok);
+
+    if (ok && !text.isEmpty()) {
+        QString toAssembler = text + "\n";
+        instruction = toAssembler.toUtf8().constData();
+
+        uint16_t opcode = c8asm.compile(instruction);
+        unsigned short addr = index * 2;
+        chip8->memory[addr]   = (opcode >> 8);
+        chip8->memory[addr+1] = (opcode & 0xFF);
+
+        updateDisassemblyViewItem(index, text);
+    }
 }
 
 void Debugger::on_listWidget_4_itemDoubleClicked(QListWidgetItem *item) {
+    Assembler c8asm;
+    std::string instruction;
 
+    int index = ui->listWidget_4->row(item);
+
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("Edit instruction"),
+                                         tr("Enter instruction"), QLineEdit::Normal,
+                                         "", &ok);
+    if (ok && !text.isEmpty()) {
+        QString toAssembler = text + "\n";
+        instruction = toAssembler.toUtf8().constData();
+
+        uint16_t opcode = c8asm.compile(instruction);
+        unsigned short addr = index * 2;
+        chip8->memory[addr]   = (opcode >> 8);
+        chip8->memory[addr+1] = (opcode & 0xFF);
+
+        updateDisassemblyViewItem(index, text);
+    }
 }
 
 void Debugger::on_leftRegisterListWidget_itemDoubleClicked(QListWidgetItem *item) {
