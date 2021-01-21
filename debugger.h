@@ -57,7 +57,8 @@ private slots:
 
 private:
     Ui::Debugger *ui;
-    void updateDisassemblyViewItem(int index, QString text);
+    void updateInstruction(QString text, uint16_t index);
+    void updateDisassemblyViewItem(int index, QString text, uint16_t opcode);
     void addDisassemblyViewItems(std::vector<std::vector<QString>> disasm);
     void addRegisterViewItems();
     void addStackViewItems();
