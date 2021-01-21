@@ -59,21 +59,33 @@
         <translation>Alt-A</translation>
     </message>
     <message>
-        <location filename="debugger.cpp" line="87"/>
+        <location filename="debugger.cpp" line="89"/>
         <source>Chip-8 Qt debugger - %1</source>
         <translation>Chip-8 Qt araztaile - %1</translation>
     </message>
     <message>
-        <location filename="debugger.cpp" line="288"/>
-        <location filename="debugger.cpp" line="306"/>
-        <location filename="debugger.cpp" line="353"/>
-        <source>Edit register</source>
-        <translation>Aldatu erregistroa</translation>
+        <location filename="debugger.cpp" line="292"/>
+        <location filename="debugger.cpp" line="316"/>
+        <source>Edit instruction</source>
+        <translation>Editatu instrukzioa</translation>
     </message>
     <message>
-        <location filename="debugger.cpp" line="289"/>
-        <location filename="debugger.cpp" line="307"/>
+        <location filename="debugger.cpp" line="293"/>
+        <location filename="debugger.cpp" line="317"/>
+        <source>Enter instruction</source>
+        <translation>Idatzi instrukzioa</translation>
+    </message>
+    <message>
+        <location filename="debugger.cpp" line="336"/>
         <location filename="debugger.cpp" line="354"/>
+        <location filename="debugger.cpp" line="401"/>
+        <source>Edit register</source>
+        <translation>Editatu erregistroa</translation>
+    </message>
+    <message>
+        <location filename="debugger.cpp" line="337"/>
+        <location filename="debugger.cpp" line="355"/>
+        <location filename="debugger.cpp" line="402"/>
         <source>Enter hex (&apos;0x&apos; optional)</source>
         <oldsource>Enter text (hex only, &apos;0x&apos; optional)</oldsource>
         <translation>Idatzi zenbaki hamaseitarra (&apos;0x&apos; aukerakoa)</translation>
