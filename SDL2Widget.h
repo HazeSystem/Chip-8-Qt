@@ -26,6 +26,7 @@ public slots:
     void run();
     void breakPoint();
     void singleStep();
+    void animate();
 
 private:
     QTimer* timer;

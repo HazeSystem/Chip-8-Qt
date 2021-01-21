@@ -59,7 +59,7 @@ Debugger::Debugger(QWidget *parent) : QMainWindow(parent),  ui(new Ui::Debugger)
     // Run
     connect(ui->actionRun, SIGNAL(triggered()), sdl2, SLOT(run()));
     connect(ui->actionRun_to_Next_Line, SIGNAL(triggered()), sdl2, SLOT(singleStep()));
-    connect(ui->actionAnimate, SIGNAL(triggered()), this, SLOT(setAnimate()));
+    connect(ui->actionAnimate, SIGNAL(triggered()), sdl2, SLOT(animate()));
 
     connect(ui->listWidget->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget_2->verticalScrollBar(), SLOT(setValue(int)));
     connect(ui->listWidget_2->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget_3->verticalScrollBar(), SLOT(setValue(int)));
@@ -119,15 +119,6 @@ void Debugger::updateCurrentLine() {
     ui->listWidget->setCurrentRow(chip8->pc / 2);
 }
 
-bool Debugger::getAnimate() {
-    return animate;
-}
-
-void Debugger::setAnimate() {
-    animate = true;
-    sdl2->run();
-}
-
 void Debugger::addDisassemblyViewItems(std::vector<std::vector<QString>> disasm) {
     if (ui->listWidget->count()) {
         ui->listWidget->clear();
@@ -155,7 +146,6 @@ void Debugger::addRegisterViewItems() {
 //    using namespace std::chrono;
 //    high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-
     for (int i = 0; i < 16; i++) {
         unsigned char v = chip8->V[i];
         if (!regsLoaded)
@@ -178,15 +168,15 @@ void Debugger::addRegisterViewItems() {
     else {
         if (chip8->I != iOld) {
             ui->rightRegisterListWidget->item(0)->setText(QString("I=  ") + QString("%1").arg(chip8->I,  4, 16, QChar{'0'}).toUpper());
-            pcOld = chip8->pc;
+            iOld = chip8->I;
         }
         if (chip8->sp != spOld) {
             ui->rightRegisterListWidget->item(1)->setText(QString("SP= ") + QString("%1").arg(chip8->sp,  2, 16, QChar{'0'}).toUpper());
-            iOld = chip8->I;
+            spOld = chip8->sp;
         }
         if (chip8->pc != pcOld) {
             ui->rightRegisterListWidget->item(2)->setText(QString("PC= ") + QString("%1").arg(chip8->pc,  4, 16, QChar{'0'}).toUpper());
-            spOld = chip8->sp;
+            pcOld = chip8->pc;
         }
         if (chip8->delay_timer != dtOld) {
             ui->rightRegisterListWidget->item(3)->setText(QString("DT= ") + QString("%1").arg(chip8->delay_timer,  2, 16, QChar{'0'}).toUpper());
@@ -222,10 +212,10 @@ void Debugger::addStackViewItems() {
     for (int i = 0; i < 16; i++) {
         unsigned short s = chip8->stack[i];
         if (!stackLoaded)
-            ui->stackListWidget->addItem(QString("%1= ").arg(i, 2, 16).toUpper() + QString("%1").arg(s, 4, 16, QChar{'0'}).toUpper());
+            ui->stackListWidget->addItem(QString("%1 ").arg(i, 2, 16, QChar{'0'}).toUpper() + QString("%1").arg(s, 4, 16, QChar{'0'}).toUpper());
         else {
             if (s != oldStack[i]) {
-                ui->stackListWidget->item(i)->setText(QString("%1= ").arg(i, 2, 16).toUpper() + QString("%1").arg(s, 4, 16, QChar{'0'}).toUpper());
+                ui->stackListWidget->item(i)->setText(QString("%1 ").arg(i, 2, 16, QChar{'0'}).toUpper() + QString("%1").arg(s, 4, 16, QChar{'0'}).toUpper());
                 oldStack[i] = s;
             }
         }

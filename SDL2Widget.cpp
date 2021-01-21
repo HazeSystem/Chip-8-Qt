@@ -17,7 +17,7 @@ Chip8 c8;
 SDL2Widget *sw;
 Debugger *debug;
 bool loaded = false;
-bool animate = false;
+bool anim = false;
 
 SDL2Widget::SDL2Widget(QWidget* parent) : QWidget(parent) {
     sw = this;
@@ -242,7 +242,7 @@ void SDL2Widget::mainLoop() {
         c8.emulateCycle();
 
     if (debug) {
-        if (loaded && debug->loaded && animate) {
+        if (loaded && debug->loaded && anim) {
             debug->updateWidgets();
             debug->updateCurrentLine();
         }
@@ -271,7 +271,7 @@ void SDL2Widget::loadRom(std::vector<unsigned char> rom) {
 
 void SDL2Widget::run() {
     if (loaded) {
-        animate = false;
+        anim = false;
         this->activateWindow();
         timer->start(1000 / SCREEN_FPS);
     }
@@ -285,7 +285,15 @@ void SDL2Widget::breakPoint() {
 
 void SDL2Widget::singleStep() {
     if (loaded) {
-        animate = true;
+        anim = true;
         mainLoop();
+    }
+}
+
+void SDL2Widget::animate() {
+    if (loaded) {
+        anim = true;
+        this->activateWindow();
+        timer->start(1000 / SCREEN_FPS);
     }
 }

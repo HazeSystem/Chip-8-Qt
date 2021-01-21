@@ -33,7 +33,6 @@ public:
     void disassembleRom(QString filepath);
     void updateWidgets();
     void updateCurrentLine();
-    bool getAnimate();
     static Debugger* getDebugContext();
 
     bool loaded = false;
@@ -51,7 +50,6 @@ private slots:
     void on_leftRegisterListWidget_itemDoubleClicked(QListWidgetItem *item);
     void on_rightRegisterListWidget_itemDoubleClicked(QListWidgetItem *item);
     void on_stackListWidget_itemDoubleClicked(QListWidgetItem *item);
-    void setAnimate();
 
 private:
     Ui::Debugger *ui;
