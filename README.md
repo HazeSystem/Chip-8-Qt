@@ -1,6 +1,5 @@
 # Chip-8 Qt
-Emulator is complete, but debugger is still very much a work in progress. Currently it only shows the disassembly. Running and single-stepping work, but not breakpoints yet. 
-Registers and stack are editable however.
+Emulator is complete, but debugger is still very much a work in progress. Editing instructions, registers and stack are implemented, but not the hex view. Running, single-stepping and animating work, but not breakpoints.
 
 Gainera, programak euskarazko itzulpen bat dauka!
 
