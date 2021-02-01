@@ -12,9 +12,6 @@
 #include <algorithm>
 #include <iterator>
 #include <map>
-//#include <chrono>
-
-//double total = 0;
 
 std::vector<std::vector<QString>> disassembly;
 std::vector<unsigned char> disassemblyViewBuffer;
@@ -41,7 +38,7 @@ QHexDocument* document;
 std::map<int, QString> comparison;
 bool documentLoaded = false;
 
-Debugger::Debugger(QWidget *parent) : QMainWindow(parent),  ui(new Ui::Debugger) {
+Debugger::Debugger(QWidget *parent) : QMainWindow(parent), ui(new Ui::Debugger) {
     ui->setupUi(this);
     dbgctx = this;
     sdl2 = SDL2Widget::getSDLContext();
@@ -102,6 +99,7 @@ void Debugger::disassembleRom(QString filepath) {
 
     if (!hexViewBuffer.isEmpty())
         hexViewBuffer.clear();
+
     if (!disassemblyViewBuffer.empty())
         disassemblyViewBuffer.clear();
 
@@ -167,9 +165,8 @@ void Debugger::updateDisassemblyViewItem(int index, QString text, uint16_t opcod
         ui->listWidget_4->item(index)->setText("");
 
     QByteArray arr;
-    for (unsigned int i = 0; i < disassemblyViewBuffer.size(); i++) {
+    for (unsigned int i = 0; i < disassemblyViewBuffer.size(); i++)
         arr.push_back(disassemblyViewBuffer[i]);
-    }
     ui->hexViewWidget->setDocument(QHexDocument::fromMemory<QMemoryBuffer>(arr));
 }
 
@@ -197,9 +194,6 @@ void Debugger::addDisassemblyViewItems(std::vector<std::vector<QString>> disasm)
 }
 
 void Debugger::addRegisterViewItems() {
-//    using namespace std::chrono;
-//    high_resolution_clock::time_point t1 = high_resolution_clock::now();
-
     for (int i = 0; i < 16; i++) {
         unsigned char v = chip8->V[i];
         if (!regsLoaded)
@@ -251,14 +245,6 @@ void Debugger::addRegisterViewItems() {
         stOld = chip8->sound_timer;
     }
     regsLoaded = true;
-
-//    high_resolution_clock::time_point t2 = high_resolution_clock::now();
-
-//    duration<double, std::milli> time_span = t2 - t1;
-
-//    total += time_span.count();
-//    if (total)
-//        qDebug() << "Total till now: " << total << " milliseconds.";
 }
 
 void Debugger::addStackViewItems() {
@@ -440,8 +426,10 @@ void Debugger::documentChanged() {
     for (unsigned short i = 0; i < document->length(); i++)
         vec.push_back(arr[i]);
 
+    for (unsigned short i = 0; i < document->length(); i++)
+        chip8->memory[i] = vec[i];
+
     addDisassemblyViewItems(c8dasm.Disassemble(vec));
-//    compareDocuments(arr);
 }
 
 void Debugger::closeEvent(QCloseEvent *event) {
