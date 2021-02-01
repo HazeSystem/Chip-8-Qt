@@ -1,5 +1,5 @@
 # Chip-8 Qt
-Emulator is complete, but debugger is still very much a work in progress. Editing instructions, registers and stack are implemented, but not the hex view. Running, single-stepping and animating work, but not breakpoints.
+Emulator is complete, but debugger is still a work in progress. Everything you'd expect except for breakpoints works!
 
 Gainera, programak euskarazko itzulpen bat dauka!
 
