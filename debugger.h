@@ -50,10 +50,9 @@ private slots:
     void on_leftRegisterListWidget_itemDoubleClicked(QListWidgetItem *item);
     void on_rightRegisterListWidget_itemDoubleClicked(QListWidgetItem *item);
     void on_stackListWidget_itemDoubleClicked(QListWidgetItem *item);
-
     void on_listWidget_3_itemDoubleClicked(QListWidgetItem *item);
-
     void on_listWidget_4_itemDoubleClicked(QListWidgetItem *item);
+    void documentChanged();
 
 private:
     Ui::Debugger *ui;
@@ -62,6 +61,7 @@ private:
     void addDisassemblyViewItems(std::vector<std::vector<QString>> disasm);
     void addRegisterViewItems();
     void addStackViewItems();
+
     bool animate = false;
 };
 

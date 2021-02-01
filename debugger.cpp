@@ -11,6 +11,7 @@
 #include <QMainWindow>
 #include <algorithm>
 #include <iterator>
+#include <map>
 //#include <chrono>
 
 //double total = 0;
@@ -30,11 +31,14 @@ bool stackLoaded = false;
 size_t ram_size;
 
 Chip8 *chip8;
+C8Dasm c8dasm;
 Debugger *dbgctx;
 SDL2Widget *sdl2;
 MainWindow *mainw;
 
 QByteArray hexViewBuffer;
+QHexDocument* document;
+std::map<int, QString> comparison;
 bool documentLoaded = false;
 
 Debugger::Debugger(QWidget *parent) : QMainWindow(parent),  ui(new Ui::Debugger) {
@@ -42,9 +46,11 @@ Debugger::Debugger(QWidget *parent) : QMainWindow(parent),  ui(new Ui::Debugger)
     dbgctx = this;
     sdl2 = SDL2Widget::getSDLContext();
 
+    // Restore window location and size
     QSettings settings("adalovegirls", "chip8-qt");
     restoreGeometry(settings.value("debug_geometry").toByteArray());
 
+    // Set font to a monospace one
     QFont f = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
     if(!(f.styleHint() & QFont::Monospace))
@@ -63,17 +69,23 @@ Debugger::Debugger(QWidget *parent) : QMainWindow(parent),  ui(new Ui::Debugger)
     connect(ui->actionRun_to_Next_Line, SIGNAL(triggered()), sdl2, SLOT(singleStep()));
     connect(ui->actionAnimate, SIGNAL(triggered()), sdl2, SLOT(animate()));
 
+    // Connect scroll bars
     connect(ui->listWidget->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget_2->verticalScrollBar(), SLOT(setValue(int)));
     connect(ui->listWidget_2->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget_3->verticalScrollBar(), SLOT(setValue(int)));
     connect(ui->listWidget_3->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget_4->verticalScrollBar(), SLOT(setValue(int)));
     connect(ui->listWidget_4->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->listWidget->verticalScrollBar(), SLOT(setValue(int)));
 
+    // Remove borders on list widgets and make it so that
+    // the window isn't deleted when closed
     this->setStyleSheet("QListWidget { border: 0; }");
     this->setAttribute(Qt::WA_DeleteOnClose, false);
 
+    // Disable the left three list widgets' scroll bars
     ui->listWidget->verticalScrollBar()->setStyleSheet("QScrollBar {width:0px;}");
     ui->listWidget_2->verticalScrollBar()->setStyleSheet("QScrollBar {width:0px;}");
     ui->listWidget_3->verticalScrollBar()->setStyleSheet("QScrollBar {width:0px;}");
+
+    // Set positions of splitters
     ui->splitter->setSizes((QList<int>){310, 358});
     ui->splitter_3->setSizes((QList<int>){700, 200});
 }
@@ -83,7 +95,6 @@ Debugger::~Debugger() {
 }
 
 void Debugger::disassembleRom(QString filepath) {
-    C8Dasm c8dasm;
     chip8 = SDL2Widget::getC8Context();
     ram_size = 0x200 + chip8->rom_size;
 
@@ -106,8 +117,9 @@ void Debugger::disassembleRom(QString filepath) {
     updateWidgets();
     updateCurrentLine();
 
-    QHexDocument* document = QHexDocument::fromMemory<QMemoryBuffer>(hexViewBuffer);
+    document = QHexDocument::fromMemory<QMemoryBuffer>(hexViewBuffer);
     ui->hexViewWidget->setDocument(document);
+    connect(document, SIGNAL(documentChanged()), this, SLOT(documentChanged()));
 
     loaded = true;
 }
@@ -153,6 +165,12 @@ void Debugger::updateDisassemblyViewItem(int index, QString text, uint16_t opcod
         ui->listWidget_4->item(index)->setText(arg);
     else
         ui->listWidget_4->item(index)->setText("");
+
+    QByteArray arr;
+    for (unsigned int i = 0; i < disassemblyViewBuffer.size(); i++) {
+        arr.push_back(disassemblyViewBuffer[i]);
+    }
+    ui->hexViewWidget->setDocument(QHexDocument::fromMemory<QMemoryBuffer>(arr));
 }
 
 void Debugger::addDisassemblyViewItems(std::vector<std::vector<QString>> disasm) {
@@ -316,7 +334,7 @@ void Debugger::on_listWidget_3_itemDoubleClicked(QListWidgetItem *item) {
                                          "", &ok);
 
     if (ok && !text.isEmpty()) {
-        updateInstruction(text, index);
+        updateInstruction(text.toUpper(), index);
     }
 }
 
@@ -328,7 +346,7 @@ void Debugger::on_listWidget_4_itemDoubleClicked(QListWidgetItem *item) {
                                          tr("Enter instruction"), QLineEdit::Normal,
                                          "", &ok);
     if (ok && !text.isEmpty()) {
-        updateInstruction(text, index);
+        updateInstruction(text.toUpper(), index);
     }
 }
 
@@ -413,6 +431,17 @@ void Debugger::on_stackListWidget_itemDoubleClicked(QListWidgetItem *item) {
         ui->stackListWidget->takeItem(index);
         ui->stackListWidget->insertItem(index, text);
     }
+}
+
+void Debugger::documentChanged() {
+    QByteArray arr = document->read(0, document->length());
+    std::vector<unsigned char> vec;
+
+    for (unsigned short i = 0; i < document->length(); i++)
+        vec.push_back(arr[i]);
+
+    addDisassemblyViewItems(c8dasm.Disassemble(vec));
+//    compareDocuments(arr);
 }
 
 void Debugger::closeEvent(QCloseEvent *event) {
