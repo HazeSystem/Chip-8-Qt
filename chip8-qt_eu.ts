@@ -59,33 +59,33 @@
         <translation>Alt-A</translation>
     </message>
     <message>
-        <location filename="debugger.cpp" line="89"/>
+        <location filename="debugger.cpp" line="98"/>
         <source>Chip-8 Qt debugger - %1</source>
         <translation>Chip-8 Qt araztaile - %1</translation>
     </message>
     <message>
-        <location filename="debugger.cpp" line="292"/>
-        <location filename="debugger.cpp" line="316"/>
+        <location filename="debugger.cpp" line="318"/>
+        <location filename="debugger.cpp" line="331"/>
         <source>Edit instruction</source>
         <translation>Editatu instrukzioa</translation>
     </message>
     <message>
-        <location filename="debugger.cpp" line="293"/>
-        <location filename="debugger.cpp" line="317"/>
+        <location filename="debugger.cpp" line="319"/>
+        <location filename="debugger.cpp" line="332"/>
         <source>Enter instruction</source>
         <translation>Idatzi instrukzioa</translation>
     </message>
     <message>
-        <location filename="debugger.cpp" line="336"/>
-        <location filename="debugger.cpp" line="354"/>
-        <location filename="debugger.cpp" line="401"/>
+        <location filename="debugger.cpp" line="343"/>
+        <location filename="debugger.cpp" line="361"/>
+        <location filename="debugger.cpp" line="408"/>
         <source>Edit register</source>
         <translation>Editatu erregistroa</translation>
     </message>
     <message>
-        <location filename="debugger.cpp" line="337"/>
-        <location filename="debugger.cpp" line="355"/>
-        <location filename="debugger.cpp" line="402"/>
+        <location filename="debugger.cpp" line="344"/>
+        <location filename="debugger.cpp" line="362"/>
+        <location filename="debugger.cpp" line="409"/>
         <source>Enter hex (&apos;0x&apos; optional)</source>
         <oldsource>Enter text (hex only, &apos;0x&apos; optional)</oldsource>
         <translation>Idatzi zenbaki hamaseitarra (&apos;0x&apos; aukerakoa)</translation>

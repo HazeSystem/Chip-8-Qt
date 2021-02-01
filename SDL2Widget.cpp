@@ -236,24 +236,25 @@ SDL2Widget* SDL2Widget::getSDLContext() {
 }
 
 void SDL2Widget::mainLoop() {
-    debug = Debugger::getDebugContext();
+    if (loaded) {
+        debug = Debugger::getDebugContext();
 
-    if (loaded)
         c8.emulateCycle();
 
-    if (debug) {
-        if (loaded && debug->loaded && anim) {
-            debug->updateWidgets();
-            debug->updateCurrentLine();
+        if (debug) {
+            if (anim) {
+                debug->updateWidgets();
+                debug->updateCurrentLine();
+            }
         }
-    }
 
-    if (loaded && c8.draw)
-        drawGraphics();
+        if (c8.draw)
+            drawGraphics();
 
-    if (loaded && c8.beep) {
-        playBeep(deviceId);
-        c8.beep = false;
+        if (c8.beep) {
+            playBeep(deviceId);
+            c8.beep = false;
+        }
     }
 }
 
@@ -267,6 +268,7 @@ void SDL2Widget::recKey(int k, bool state) {
 void SDL2Widget::loadRom(std::vector<unsigned char> rom) {
     c8.init(rom);
     loaded = true;
+    run();
 }
 
 void SDL2Widget::run() {

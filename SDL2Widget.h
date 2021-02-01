@@ -16,8 +16,8 @@ class SDL2Widget : public QWidget
 public:
     SDL2Widget(QWidget* parent = nullptr);
 	~SDL2Widget();
-    static void loadRom(std::vector<unsigned char> rom);
-    static void recKey(int key, bool state);
+    void loadRom(std::vector<unsigned char> rom);
+    void recKey(int key, bool state);
     static Chip8* getC8Context();
     static SDL2Widget* getSDLContext();
     bool running;

@@ -89,7 +89,6 @@ void MainWindow::openRom() {
     sw->running = true;
 
     sw->loadRom(buffer);
-    sw->breakPoint();
 }
 
 void MainWindow::openDebugger() {

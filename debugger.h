@@ -35,8 +35,6 @@ public:
     void updateCurrentLine();
     static Debugger* getDebugContext();
 
-    bool loaded = false;
-
 protected:
     void closeEvent(QCloseEvent *event) override;
     void changeEvent(QEvent *event) override;

@@ -118,8 +118,6 @@ void Debugger::disassembleRom(QString filepath) {
     document = QHexDocument::fromMemory<QMemoryBuffer>(hexViewBuffer);
     ui->hexViewWidget->setDocument(document);
     connect(document, SIGNAL(documentChanged()), this, SLOT(documentChanged()));
-
-    loaded = true;
 }
 
 void Debugger::updateInstruction(QString text, uint16_t index) {
